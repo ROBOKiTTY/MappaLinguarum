@@ -1,5 +1,5 @@
 # MappaLinguarum
-Language map application in Java
+Language map application in Java using Swing for GUI
 
 =System Requirements=
 
@@ -17,3 +17,7 @@ JRE is required, either JRE7 or JDK7 or later.
 JMapViewer: see http://wiki.openstreetmap.org/wiki/JMapViewer
 
 (release used: http://svn.openstreetmap.org/applications/viewer/jmapviewer/releases/2011-02-19/)
+
+=Licensing Information=
+
+GPLv3
