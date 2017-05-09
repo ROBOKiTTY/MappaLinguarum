@@ -8,6 +8,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
@@ -29,7 +30,9 @@ public class ControlPanel extends JPanel {
 	private JPanel languageControlPanel;
 	//private JPanel phonemeControlPanel;	//this is for future extension, so not implemented for project
 	private JPanel infoPanel;
+	private JSplitPane controlAndInfoSplitPane;
 	private HtmlLinkListener linkListener;
+	private JSplitPane infoBoxSplitPane;
 	private InfoBox infoBoxLeft;
 	private InfoBox infoBoxRight;
 	private JScrollPane infoScrollLeft;
@@ -53,26 +56,26 @@ public class ControlPanel extends JPanel {
 		final BoxLayout boxLayout = new BoxLayout(this, BoxLayout.Y_AXIS);
 		Runnable r = new Runnable() {
 			public void run() {
-				Dimension topDim = new Dimension(getWidth(), (int) ( getHeight() * 0.3) );
-				Dimension bottomDim = new Dimension(getWidth(), (int) ( getHeight() * 0.7) );
+				//Dimension topDim = new Dimension(getWidth(), (int) ( getHeight() * 0.3) );
+				//Dimension bottomDim = new Dimension(getWidth(), (int) ( getHeight() * 0.7) );
 				
 				controlBox = new JTabbedPane();
-				controlBox.setPreferredSize(topDim);
 				controlBox.setBorder( BorderFactory.createEtchedBorder() );
 				controlBox.setAlignmentY(TOP_ALIGNMENT);
 				
 				initiateControlBox();
 				
 				infoPanel = new JPanel();
-				infoPanel.setPreferredSize(bottomDim);
 				infoPanel.setBorder( BorderFactory.createEtchedBorder() );
 				infoPanel.setAlignmentY(BOTTOM_ALIGNMENT);
 				
 				initiateInfoPanelContents();
 				
 				setLayout(boxLayout);
-				add(controlBox);
-				add(infoPanel);
+				controlAndInfoSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, controlBox, infoPanel);
+				controlAndInfoSplitPane.setDividerLocation(0.45);
+				controlAndInfoSplitPane.setResizeWeight(0.45);
+				add(controlAndInfoSplitPane);
 				validate();
 			}
 		};
@@ -142,8 +145,10 @@ public class ControlPanel extends JPanel {
 				BoxLayout box = new BoxLayout(infoPanel, BoxLayout.Y_AXIS);
 				
 				infoPanel.setLayout(box);
-				infoPanel.add(infoScrollLeft);
-				infoPanel.add(infoScrollRight);
+				infoBoxSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, infoScrollLeft, infoScrollRight);
+				infoBoxSplitPane.setDividerLocation(0.5);
+				infoBoxSplitPane.setResizeWeight(0.5);
+				infoPanel.add(infoBoxSplitPane);
 			}
 		});
 	}
@@ -180,6 +185,7 @@ public class ControlPanel extends JPanel {
 	public JTabbedPane getControlBox() { return controlBox; }
 	public InfoBox getInfoBoxLeft() { return infoBoxLeft; }
 	public InfoBox getInfoBoxRight() { return infoBoxRight; }
+	public JSplitPane getControlAndInfoSplitPane() { return controlAndInfoSplitPane; }
 	public JScrollPane getInfoScrollLeft() { return infoScrollLeft; }
 	public JScrollPane getInfoScrollRight() { return infoScrollRight; }
 	public void setMap(Map m) { map = m; }

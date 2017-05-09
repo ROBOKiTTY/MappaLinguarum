@@ -375,7 +375,7 @@ public class Map extends JMapViewer implements IObservable {
 	 * @see DefaultMapController
 	 */
 	private class MapTroller extends DefaultMapController {
-
+		
 		/**
 		 * constructor simply calls parent constructor,
 		 * also enables left-button for movement

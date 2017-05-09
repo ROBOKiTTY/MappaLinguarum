@@ -27,6 +27,7 @@ public class ApplicationMenu extends JMenuBar {
 	private final JMenuItem fileItemExit;
 	private final JMenu menuView;
 	private final JMenuItem viewItemShowHideControlBox;
+	private final JMenuItem viewItemShowHideMap;
 	private final JMenuItem viewItemShowHideConsole;
 	private final JMenuItem viewMosaicToggle;
 	private final JMenuItem viewFamilyToggle;
@@ -61,27 +62,29 @@ public class ApplicationMenu extends JMenuBar {
 		menuView = new JMenu("View");
 		menuView.setMnemonic(KeyEvent.VK_V);
 		//View->Show/Hide Selection Control Box
-		viewItemShowHideControlBox = new JMenuItem("Hide Selection Control Box");
+		viewItemShowHideControlBox = new JMenuItem("Hide Selection Control Box/Infoboxes");
 		viewItemShowHideControlBox.setMnemonic(KeyEvent.VK_S);
 		viewItemShowHideControlBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				boolean isVisible = mainWindow.getControlPanel().getControlBox().isVisible();
-				mainWindow.getControlPanel().getControlBox().setVisible(!isVisible);
+				boolean isVisible = mainWindow.getControlPanel().getControlAndInfoSplitPane().isVisible();
+				mainWindow.getControlPanel().getControlAndInfoSplitPane().setVisible(!isVisible);
 				if (isVisible)
 				{
-					viewItemShowHideControlBox.setText("Show Selection Control Box");
+					mainWindow.getMapAndControlSplitPane().setDividerLocation(1d);
+					viewItemShowHideControlBox.setText("Show Selection Control Box/Infoboxes");
 				}
 				else
 				{
-					viewItemShowHideControlBox.setText("Hide Selection Control Box");
+					mainWindow.getMapAndControlSplitPane().setDividerLocation(0.65);
+					viewItemShowHideControlBox.setText("Hide Selection Control Box/Infoboxes");
 				}
 				mainWindow.validate();
 			}
 		});
-		/*
+		
 		//View->Show/Hide Map
-		JMenuItem viewItemShowHideMap = new JMenuItem("Hide Map");
+		viewItemShowHideMap = new JMenuItem("Hide Map");
 		viewItemShowHideMap.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -89,16 +92,18 @@ public class ApplicationMenu extends JMenuBar {
 				mainWindow.getMap().setVisible(!isVisible);
 				if (isVisible)
 				{
+					mainWindow.getMapAndControlSplitPane().setDividerLocation(0d);
 					viewItemShowHideMap.setText("Show Map");
 				}
 				else
 				{
+					mainWindow.getMapAndControlSplitPane().setDividerLocation(0.75);
 					viewItemShowHideMap.setText("Hide Map");
 				}
 				mainWindow.validate();
 			}
 		});
-		*/
+		
 		//View->Show/Hide Bottom Console
 		viewItemShowHideConsole = new JMenuItem("Hide Bottom Console");
 		viewItemShowHideConsole.setMnemonic(KeyEvent.VK_C);
@@ -109,10 +114,12 @@ public class ApplicationMenu extends JMenuBar {
 				mainWindow.getTextPane().setVisible(!isVisible);
 				if (isVisible)
 				{
+					mainWindow.getTopAndBottomSplitPane().setDividerLocation(1d);
 					viewItemShowHideConsole.setText("Show Bottom Console");
 				}
 				else
 				{
+					mainWindow.getTopAndBottomSplitPane().setDividerLocation(0.8d);
 					viewItemShowHideConsole.setText("Hide Bottom Console");
 				}
 				mainWindow.validate();
@@ -166,7 +173,7 @@ public class ApplicationMenu extends JMenuBar {
 		});
 		//putting View together
 		menuView.add(viewItemShowHideControlBox);
-		//menuView.add(viewItemShowHideMap);
+		menuView.add(viewItemShowHideMap);
 		menuView.add(viewItemShowHideConsole);
 		menuView.addSeparator();
 		menuView.add(viewMosaicToggle);

@@ -1,6 +1,5 @@
 package ca.rk.mappalinguarum.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.Font;
@@ -13,6 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
@@ -51,6 +51,8 @@ public class ApplicationFrame extends JFrame {
 	private int appWidth;
 	private int appHeight;
 	
+	private JSplitPane mapAndControlSplitPane;
+	private JSplitPane topAndBottomSplitPane;
 	private JScrollPane textPane;
 	private ControlPanel controlPanel;
 	private Map map;
@@ -97,13 +99,13 @@ public class ApplicationFrame extends JFrame {
 		textPane = textConsole.getTextPane();
 		textPane.setPreferredSize(new Dimension(appWidth , (int) (appHeight * TEXT_PANE_SIZE_MODIFIER) ) );
 		textPane.setBorder( BorderFactory.createEtchedBorder() );
-		this.add(textPane, BorderLayout.PAGE_END);
+		//this.add(textPane, BorderLayout.PAGE_END);
 		
 		//add right-side panels
 		controlPanel = new ControlPanel();
 		controlPanel.setPreferredSize(new Dimension( (int) (appWidth * CONTROL_PANEL_SIZE_MODIFIER), 0) );
 		controlPanel.setBorder( BorderFactory.createEtchedBorder() );
-		this.add(controlPanel, BorderLayout.EAST);
+		//this.add(controlPanel, BorderLayout.EAST);
 
 		//add menu
 		ApplicationMenu menuBar = new ApplicationMenu(this);
@@ -129,15 +131,22 @@ public class ApplicationFrame extends JFrame {
 					map.setPreferredSize( new Dimension( (int) (appWidth * MAP_SIZE_MODIFIER), appHeight) );
 					map.setBorder( BorderFactory.createEtchedBorder() );
 					map.setTileLoader( new OsmFileCacheTileLoader(map) );
-					add(map, BorderLayout.WEST);
+					mapAndControlSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, map, controlPanel);
+					mapAndControlSplitPane.setDividerLocation(0.5);
+					mapAndControlSplitPane.setResizeWeight(0.5);
+					add(mapAndControlSplitPane);
 				}
 				catch (Exception e) {
-					TextConsole.writeLine("lolwut unhandled exception");
+					TextConsole.writeLine("Unhandled exception");
 					e.printStackTrace();
 				}
 
 				TextConsole.writeLine("Map loaded!");
 				controlPanel.initiateControlBoxContents();
+				topAndBottomSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, mapAndControlSplitPane, textPane);
+				topAndBottomSplitPane.setDividerLocation(0.75);
+				topAndBottomSplitPane.setResizeWeight(0.75);
+				add(topAndBottomSplitPane);
 				//force validate now that UI has been layed out
 				validate();
 			}
@@ -149,6 +158,8 @@ public class ApplicationFrame extends JFrame {
 	public Map getMap() { return map; }
 	public ControlPanel getControlPanel() { return controlPanel; }
 	public JScrollPane getTextPane() { return textPane; }
+	public JSplitPane getMapAndControlSplitPane() { return mapAndControlSplitPane; }
+	public JSplitPane getTopAndBottomSplitPane() { return topAndBottomSplitPane; }
 	
 	/**
 	 * 
