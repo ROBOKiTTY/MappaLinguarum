@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import ca.rk.mappalinguarum.exceptions.IllegalPolygonException;
 import ca.rk.mappalinguarum.model.Language;
@@ -15,7 +16,7 @@ import ca.rk.mappalinguarum.util.RandomColourGenerator;
 
 
 /**
- * represents a polygonal area on the map that serves as a visual indicator of a
+ * represents a set of polygonal areas (>= 1) on the map that serves as a visual indicator of a
  * language's distribution
  * 
  * @author RK
@@ -27,7 +28,7 @@ public class LanguagePolygon implements IObserver {
 	private Location encapsulatedLocation;
 	private Colour colour;
 	private Colour familyDerivedColour;
-	private Polygon polygon;
+	private List<Polygon> polygons;
 	private double[] latitudes;
 	private double[] longitudes;
 	private ArrayList<Integer> xPoints;
@@ -51,81 +52,95 @@ public class LanguagePolygon implements IObserver {
 	}
 	
 	/**
-	 * construct the polygon from Location information and map zoom level
+	 * construct list of polygons from Location information and map zoom level
 	 * return null if the polygon has fewer than three vertices within the viewport
 	 * 
 	 * @param l the Location object to use
 	 * @param zoomLevel the current zoom level in the map viewer
-	 * @return a Polygon, null if there's nothing to draw
+	 * @return one or more Polygons, empty list if there's nothing to draw
 	 * @throws IllegalPolygonException if an illegal polygon is detected
 	 */
-	private Polygon constructPolygon(Location l, int zoomLevel) throws IllegalPolygonException {
-		latitudes = l.getLatitudes();
-		longitudes = l.getLongitudes();
-		if (xPoints == null) {
-			xPoints = new ArrayList<Integer>(longitudes.length);
-		}
-		if (yPoints == null) {
-			yPoints = new ArrayList<Integer>(latitudes.length);
-		}
-		
-		xPoints.clear();
-		yPoints.clear();
-		
-		Point point;
-		for (int i = 0; i < latitudes.length; ++i) {
-			//force the map viewer to return a non-null Point even if it's outside of the viewport
-			point = map.getMapPosition(latitudes[i], longitudes[i], false);
+	private List<Polygon> constructPolygons(Location l, int zoomLevel) throws IllegalPolygonException {
+		List<Location.LatLongSet> latlongSets = l.getLatLongSets();
+		List<Polygon> polys = new ArrayList<Polygon>(latlongSets.size());
+		for (Location.LatLongSet latlong : latlongSets) {
+			latitudes = latlong.getLatitudes();
+			longitudes = latlong.getLongitudes();
+			if (xPoints == null) {
+				xPoints = new ArrayList<Integer>(longitudes.length);
+			}
+			if (yPoints == null) {
+				yPoints = new ArrayList<Integer>(latitudes.length);
+			}
 			
-			xPoints.add(point.x);
-			yPoints.add(point.y);
+			xPoints.clear();
+			yPoints.clear();
+			
+			Point point;
+			for (int i = 0; i < latitudes.length; ++i) {
+				//force the map viewer to return a non-null Point even if it's outside of the viewport
+				point = map.getMapPosition(latitudes[i], longitudes[i], false);
+				
+				xPoints.add(point.x);
+				yPoints.add(point.y);
+			}
+			
+			//unequal number of x and y points means something is wrong
+			if ( xPoints.size() != yPoints.size() ) {
+				throw new IllegalPolygonException();
+			}
+			
+			//a polygon with fewer than three vertices makes no sense
+			if (xPoints.size() < 3) {
+				return null;
+			}
+			
+			//convert ArrayLists to primitive arrays, since Polygon only accepts those
+			int[] xArray = new int[ xPoints.size() ];
+			int[] yArray = new int[ yPoints.size() ];
+			Iterator<Integer> xIterator = xPoints.iterator();
+			Iterator<Integer> yIterator = yPoints.iterator();
+			
+			for (int i = 0; i < xArray.length; ++i) {
+				xArray[i] = xIterator.next();
+				yArray[i] = yIterator.next();
+			}
+			
+			polys.add(new Polygon(xArray, yArray, xArray.length));
 		}
 		
-		//unequal number of x and y points means something is wrong
-		if ( xPoints.size() != yPoints.size() ) {
-			throw new IllegalPolygonException();
-		}
-		
-		//a polygon with fewer than three vertices makes no sense
-		if (xPoints.size() < 3) {
-			return null;
-		}
-		
-		//convert ArrayLists to primitive arrays, since Polygon only accepts those
-		int[] xArray = new int[ xPoints.size() ];
-		int[] yArray = new int[ yPoints.size() ];
-		Iterator<Integer> xIterator = xPoints.iterator();
-		Iterator<Integer> yIterator = yPoints.iterator();
-		
-		for (int i = 0; i < xArray.length; ++i) {
-			xArray[i] = xIterator.next();
-			yArray[i] = yIterator.next();
-		}
-
-		return new Polygon(xArray, yArray, xArray.length);
+		return polys;
 	}
 	
 	/**
-	 * whether the input point is within the polygon
+	 * whether the input point is within the polygons
 	 * 
 	 * @param p the input point
-	 * @return true if this.polygon contains p, otherwise false
+	 * @return true if any polygon from this.polygons contains p, otherwise false
 	 */
 	public boolean contains(Point p) {
 		//null polygon contains nothing
-		if (polygon == null) {
+		if (polygons == null || polygons.isEmpty()) {
 			return false;
 		}
 
-		return polygon.contains(p);
+		for(Polygon poly : polygons) {
+			if (poly.contains(p)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public void update() {
 		try {
-			polygon = constructPolygon(encapsulatedLocation, map.getZoom() );
-			if (polygon != null) {
-				polygon.invalidate();
+			polygons = constructPolygons(encapsulatedLocation, map.getZoom() );
+			if (polygons == null) {
+				return;
+			}
+			for (Polygon poly : polygons) {
+				poly.invalidate();
 			}
 		}
 		catch(IllegalPolygonException ipe) {
@@ -194,7 +209,13 @@ public class LanguagePolygon implements IObserver {
 	//accessors
 	public Location getEncapsulatedLocation() { return encapsulatedLocation; }
 	public Language getEncapsulatedLanguage() { return encapsulatedLocation.getLanguage(); }
-	public Polygon getPolygon() { return polygon; }
+	public List<Polygon> getPolygons() {
+		if (polygons == null)
+		{
+			update();
+		}
+		return polygons;
+	}
 	public boolean getIsHighlighted() { return isHighlighted; }
 	
 	public void setIsHighlighted(boolean b) { isHighlighted = b; }

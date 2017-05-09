@@ -281,17 +281,21 @@ public class Map extends JMapViewer implements IObservable {
 		for (LanguagePolygon lp : lpCollection) {
 			if (lp == mouseoveredLP) {
 				lp.setIsHighlighted(true);
-				
 			}
 			else {
 				lp.setIsHighlighted(false);
 			}
-			Polygon poly = lp.getPolygon();
-			if (poly != null) {
-				//jaggies be gone!
-				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				g2d.setColor( lp.getColor() );
-				g2d.fillPolygon(poly);
+			List<Polygon> polys = lp.getPolygons();
+			if (polys == null) {
+				continue;
+			}
+			for (Polygon poly : polys) {
+				if (poly != null) {
+					//jaggies be gone!
+					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+					g2d.setColor( lp.getColor() );
+					g2d.fillPolygon(poly);
+				}
 			}
 		}
 	}
@@ -383,6 +387,20 @@ public class Map extends JMapViewer implements IObservable {
 			super(map);
 			setMovementMouseButton(MouseEvent.BUTTON1);
 		}
+		
+		/**
+		 * releasing mouse prints latitude/longitude at mouse pointer to text console
+		 */
+		@Override
+		public void mouseReleased(MouseEvent e)
+		{
+			super.mouseReleased(e);
+			if (e.getClickCount() == 1) {
+				Coordinate coord = getPosition(getMousePosition());
+				TextConsole.writeLine("{Longitude/Latitude: " + coord.getLon() + "," + coord.getLat() +
+									"} at mouse pointer.");
+			}
+		}
 
 		/**
 		 * single-clicking, without dragging, on a language shows information about it;
@@ -391,23 +409,25 @@ public class Map extends JMapViewer implements IObservable {
 		 * zoom in when double-clicking is detected, regardless of which key
 		 */
 		@Override
-	    public void mouseClicked(MouseEvent e) {
-	        if (e.getClickCount() == 2) {
-	            map.zoomIn(e.getPoint());
-	        }
-	        else if (e.getClickCount() == 1 && mouseoveredLP != null) {
-	        	if (isParseFailed) {
-	        		return;
+		public void mouseClicked(MouseEvent e) {
+			if (e.getClickCount() == 2) {
+				map.zoomIn(e.getPoint());
+			}
+			else if (e.getClickCount() == 1) {
+				if (mouseoveredLP != null) {
+					if (isParseFailed) {
+						return;
+					}
+					
+					Language l = mouseoveredLP.getEncapsulatedLanguage();
+	
+					if ( SwingUtilities.isLeftMouseButton(e) ) {
+						controlPanel.setInfoBoxLeftText( l.getHTML() );
+					}
+					else if ( SwingUtilities.isRightMouseButton(e) ) {
+						controlPanel.setInfoBoxRightText( l.getHTML() );
+					}
 	        	}
-	        	
-				Language l = mouseoveredLP.getEncapsulatedLanguage();
-
-				if ( SwingUtilities.isLeftMouseButton(e) ) {
-					controlPanel.setInfoBoxLeftText( l.getHTML() );
-				}
-				else if ( SwingUtilities.isRightMouseButton(e) ) {
-					controlPanel.setInfoBoxRightText( l.getHTML() );
-				}
 			}
 		}
 		

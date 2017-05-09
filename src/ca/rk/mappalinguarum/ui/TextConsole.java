@@ -1,8 +1,20 @@
 package ca.rk.mappalinguarum.ui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
+
+import ca.rk.mappalinguarum.util.OperatingSystem;
+import ca.rk.mappalinguarum.util.OperatingSystem.OS;
 
 /**
  * encapsulates a singleton console that displays messages to users
@@ -18,6 +30,7 @@ public class TextConsole {
 	private static TextConsole textConsole = null;
 	private JScrollPane textPane;
 	private JTextArea textArea;
+	private ContextMenu contextMenu;
 
 	/**
 	 * private constructor, called from static method;
@@ -31,10 +44,15 @@ public class TextConsole {
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
 		textArea.setText("");
+		DefaultCaret caret = (DefaultCaret) textArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
 		textPane = new JScrollPane(textArea);
 		textPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		textPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		contextMenu = new ContextMenu();
+		textArea.addMouseListener(new TextConsoleMouseListener());
 	}
 	
 	/**
@@ -84,4 +102,82 @@ public class TextConsole {
 	
 	//object accessors
 	public JScrollPane getTextPane() { return textPane; }
+	
+	/**
+	 * right-click context menu functionality
+	 * 
+	 * @author RK
+	 *
+	 */
+	private class ContextMenu extends JPopupMenu {
+		private static final long serialVersionUID = 1L;
+		
+		private JMenuItem menuOptionCopy;
+		private JMenuItem menuOptionSelectAll;
+		
+		/**
+		 * constructs a ContextMenu with menu items
+		 */
+		public ContextMenu() {
+			//Copy
+			menuOptionCopy = new JMenuItem("Copy");
+			menuOptionCopy.setMnemonic(KeyEvent.VK_C);
+			menuOptionCopy.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					textArea.copy();
+				}
+			});
+			//Select All
+			menuOptionSelectAll = new JMenuItem("Select All");
+			menuOptionSelectAll.setMnemonic(KeyEvent.VK_A);
+			menuOptionSelectAll.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					textArea.selectAll();
+				}
+			});
+			add(menuOptionCopy);
+			add(menuOptionSelectAll);
+		}
+	}
+	
+	/**
+	 * handles mouse gestures for the context menu
+	 * 
+	 * @author RK
+	 *
+	 */
+	private class TextConsoleMouseListener extends MouseAdapter {
+		
+		private OS os;
+		
+		/**
+		 * constructs an TextConsoleMouseListener and notes what OS is running
+		 * in order to produce the proper context menu behaviour
+		 */
+		public TextConsoleMouseListener() {
+			os = OperatingSystem.getOS();
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+			if ( e.isPopupTrigger() ) {
+				if (os != OS.MAC) {
+					return;
+				}
+				contextMenu.show( e.getComponent(), e.getX(), e.getY() );
+			}
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			if ( e.isPopupTrigger() ) {
+				if (os == OS.MAC) {
+					return;
+				}
+				contextMenu.show( e.getComponent(), e.getX(), e.getY() );
+			}
+		}
+	}
 }

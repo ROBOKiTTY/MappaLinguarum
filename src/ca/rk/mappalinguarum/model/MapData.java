@@ -177,6 +177,7 @@ public class MapData {
 			
 			if (qName.equalsIgnoreCase("language") ) {
 				lang = new Language();
+				loc = new Location();
 				langPhonemeInv = new PhonemeInventory();
 			}
 			else if (qName.equalsIgnoreCase("name") ) {
@@ -295,7 +296,6 @@ public class MapData {
 				isReadingPhonemeVowels = false;
 			}
 			else if (isReadingLocation) {
-				loc = new Location();
 				if (!isEmpty) {
 					/* Google KML coordinate format:
 					 * longitude,latitude,altitude longitude,latitude,altitude
@@ -329,12 +329,10 @@ public class MapData {
 						lats[index] = Double.parseDouble(lonLat[1]);
 						++index;
 					}
-					loc.setLongitudes(lons);
-					loc.setLatitudes(lats);
+					loc.addLatLongs(lons, lats);
 				}
 				else {
-					loc.setLongitudes(new double[] {0} );
-					loc.setLatitudes(new double[] {0} );
+					loc.addLatLongs( new double[] {0}, new double[] {0} );
 				}
 				isReadingLocation = false;
 			}
