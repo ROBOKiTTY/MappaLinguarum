@@ -10,9 +10,11 @@ import java.util.List;
 import ca.rk.mappalinguarum.exceptions.IllegalPolygonException;
 import ca.rk.mappalinguarum.model.Language;
 import ca.rk.mappalinguarum.model.Location;
+import ca.rk.mappalinguarum.ui.interfaces.IObservable;
 import ca.rk.mappalinguarum.ui.interfaces.IObserver;
 import ca.rk.mappalinguarum.util.Colour;
 import ca.rk.mappalinguarum.util.RandomColourGenerator;
+import ca.rk.mappalinguarum.util.textures.TexturePattern;
 
 
 /**
@@ -22,17 +24,19 @@ import ca.rk.mappalinguarum.util.RandomColourGenerator;
  * @author RK
  *
  */
-public class LanguagePolygon implements IObserver {
+public class LanguagePolygon implements IObserver, IObservable {
 
 	private Map map;
 	private Location encapsulatedLocation;
 	private Colour colour;
 	private Colour familyDerivedColour;
 	private List<Polygon> polygons;
+	private TexturePattern texture;
 	private double[] latitudes;
 	private double[] longitudes;
 	private ArrayList<Integer> xPoints;
 	private ArrayList<Integer> yPoints;
+	private List<IObserver> observers;
 	private boolean isHighlighted;
 	
 	/**
@@ -49,6 +53,14 @@ public class LanguagePolygon implements IObserver {
 		familyDerivedColour = encapsulatedLocation.getLanguage().getUrFamily().getColour();
 		familyDerivedColour = RandomColourGenerator.getInstance().mixColours(familyDerivedColour, colour);
 		isHighlighted = false;
+		observers = new ArrayList<IObserver>();
+		
+		update();
+		if (polygons == null || polygons.isEmpty()) {
+			return;
+		}
+		//texture = new TexturePattern(colour);
+		//addObserver(texture);
 	}
 	
 	/**
@@ -135,10 +147,11 @@ public class LanguagePolygon implements IObserver {
 	@Override
 	public void update() {
 		try {
-			polygons = constructPolygons(encapsulatedLocation, map.getZoom() );
+			polygons = constructPolygons( encapsulatedLocation, map.getZoom() );
 			if (polygons == null) {
 				return;
 			}
+			notifyObservers();
 			for (Polygon poly : polygons) {
 				poly.invalidate();
 			}
@@ -185,6 +198,23 @@ public class LanguagePolygon implements IObserver {
 		return true;
 	}
 
+	@Override
+	public void addObserver(IObserver obs) {
+		observers.add(obs);
+	}
+
+	@Override
+	public void removeObserver(IObserver obs) {
+		observers.remove(obs);
+	}
+
+	@Override
+	public void notifyObservers() {
+		for (IObserver observer : observers) {
+			observer.update();
+		}
+	}
+
 	/**
 	 * gets a Color object depending on the ViewMode and whether the LanguagePolygon is highlighted;
 	 * in family mode, return the family-derived colour as a Color; otherwise, return own colour;
@@ -195,12 +225,12 @@ public class LanguagePolygon implements IObserver {
 	public Color getColor() {
 		if (map.getViewMode() == ViewMode.FAMILIES) {
 			if (isHighlighted) {
-				return RandomColourGenerator.getInstance().lightenColour(familyDerivedColour).toColor();
+				return Colour.lightenColour(familyDerivedColour).toColor();
 			}
 			return familyDerivedColour.toColor();
 		}
 		if (isHighlighted) {
-			Color c = RandomColourGenerator.getInstance().lightenColour(colour).toColor();
+			Color c = Colour.lightenColour(colour).toColor();
 			return c;
 		}
 		return colour.toColor();
@@ -216,6 +246,7 @@ public class LanguagePolygon implements IObserver {
 		}
 		return polygons;
 	}
+	public TexturePattern getTexture() { return texture; }
 	public boolean getIsHighlighted() { return isHighlighted; }
 	
 	public void setIsHighlighted(boolean b) { isHighlighted = b; }

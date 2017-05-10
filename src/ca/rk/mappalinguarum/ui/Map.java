@@ -5,7 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.TexturePaint;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +17,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openstreetmap.gui.jmapviewer.*;
+import org.openstreetmap.gui.jmapviewer.Coordinate;
+import org.openstreetmap.gui.jmapviewer.DefaultMapController;
+import org.openstreetmap.gui.jmapviewer.JMapViewer;
 
 import ca.rk.mappalinguarum.exceptions.InvalidXMLException;
 import ca.rk.mappalinguarum.model.Feature;
@@ -25,6 +29,7 @@ import ca.rk.mappalinguarum.model.Location;
 import ca.rk.mappalinguarum.model.MapData;
 import ca.rk.mappalinguarum.ui.interfaces.IObservable;
 import ca.rk.mappalinguarum.ui.interfaces.IObserver;
+import ca.rk.mappalinguarum.util.textures.TexturePattern;
 
 
 /**
@@ -277,6 +282,8 @@ public class Map extends JMapViewer implements IObservable {
 	 */
 	private void paintPolygons(Graphics g, Collection<LanguagePolygon> lpCollection) {
 		Graphics2D g2d = (Graphics2D) g;
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
 		notifyObservers();
 		for (LanguagePolygon lp : lpCollection) {
 			if (lp == mouseoveredLP) {
@@ -291,10 +298,16 @@ public class Map extends JMapViewer implements IObservable {
 			}
 			for (Polygon poly : polys) {
 				if (poly != null) {
-					//jaggies be gone!
-					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 					g2d.setColor( lp.getColor() );
-					g2d.fillPolygon(poly);
+					g2d.fill(poly);
+
+					//TODO: make this work maybe
+//					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//					g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,
+//							RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+//					g2d.setPaint(new TexturePaint(lp.getTexture().getImage(),
+//							new Rectangle2D.Float(0, 0, TexturePattern.WIDTH, TexturePattern.HEIGHT)));
+//					g2d.fill(poly);
 				}
 			}
 		}
@@ -396,9 +409,16 @@ public class Map extends JMapViewer implements IObservable {
 		{
 			super.mouseReleased(e);
 			if (e.getClickCount() == 1) {
-				Coordinate coord = getPosition(getMousePosition());
-				TextConsole.writeLine("{Longitude/Latitude: " + coord.getLon() + "," + coord.getLat() +
-									"} at mouse pointer.");
+				Point mousePosition = getMousePosition();
+				if (mousePosition == null) {
+					//mouse pointer has most likely exited the component; just return
+					return;
+				}
+				else {
+					Coordinate coord = getPosition(getMousePosition());
+					TextConsole.writeLine("{Longitude/Latitude: " + coord.getLon() + "," + coord.getLat() +
+										"} at mouse pointer.");
+				}
 			}
 		}
 

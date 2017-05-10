@@ -3,7 +3,7 @@ package ca.rk.mappalinguarum.util;
 import java.util.Random;
 
 /**
- * singleton class generates pseudorandom colours to be assigned to Locations
+ * singleton class that generates pseudorandom colours to be assigned to Locations
  * 
  * @author RK
  *
@@ -14,7 +14,6 @@ public class RandomColourGenerator {
 	private static RandomColourGenerator rcg;
 	private final double PHI;
 	
-	private final Colour REF_COLOUR = new Colour(255, 255, 255);
 	private Random rng;
 	
 	/**
@@ -46,21 +45,6 @@ public class RandomColourGenerator {
 		int r = nextInt(Colour.MAX_VALUE);
 		int g = nextInt(Colour.MAX_VALUE);
 		int b = nextInt(Colour.MAX_VALUE);
-
-		return new Colour(r, g, b);
-	}
-	
-	/**
-	 * return a lightened shade of the input colour by mixing it with an internal
-	 * reference colour (this.REF_COLOUR), which is white
-	 * 
-	 * @param colour the base Colour to work with
-	 * @return a lighter Colour
-	 */
-	public Colour lightenColour(Colour colour) {
-		int r = (colour.getRed() + REF_COLOUR.getRed() ) / 2;
-		int g = (colour.getGreen() + REF_COLOUR.getGreen() ) / 2;
-		int b = (colour.getBlue() + REF_COLOUR.getBlue() ) / 2;
 
 		return new Colour(r, g, b);
 	}

@@ -5,6 +5,8 @@ import java.awt.DisplayMode;
 import java.awt.Font;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -51,6 +53,7 @@ public class ApplicationFrame extends JFrame {
 	private int appWidth;
 	private int appHeight;
 	
+	private ApplicationMenu menuBar;
 	private JSplitPane mapAndControlSplitPane;
 	private JSplitPane topAndBottomSplitPane;
 	private JScrollPane textPane;
@@ -67,6 +70,7 @@ public class ApplicationFrame extends JFrame {
 		appWidth = (int) (screenWidth / 1.5);
 		appHeight = (int) (screenHeight / 1.5);
 		addWindowListener( new WindowListener() );
+		addKeyListener( new KeyTroller() );
 		setSize(appWidth, appHeight);
 		setLocationRelativeTo(null);	//centres window
 		setFont(FONT);
@@ -108,7 +112,7 @@ public class ApplicationFrame extends JFrame {
 		//this.add(controlPanel, BorderLayout.EAST);
 
 		//add menu
-		ApplicationMenu menuBar = new ApplicationMenu(this);
+		menuBar = new ApplicationMenu(this);
 		this.setJMenuBar(menuBar);
 		
 		TextConsole.clear();
@@ -178,6 +182,31 @@ public class ApplicationFrame extends JFrame {
 		@Override
 		public void windowClosing(WindowEvent e) {
 			System.exit(0);
+		}
+	}
+
+	/**
+	 * inner helper class that listens for key events
+	 * 
+	 * @author RK
+	 * @see KeyAdapter
+	 */
+	private class KeyTroller extends KeyAdapter {
+		/**
+		 * releasing alt key highlights first menu item
+		 */
+		@Override
+		public void keyReleased(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ALT) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run()
+					{
+						menuBar.getMenu(0).doClick();
+					}
+				};
+				SwingUtilities.invokeLater(r);
+			}
 		}
 	}
 	
