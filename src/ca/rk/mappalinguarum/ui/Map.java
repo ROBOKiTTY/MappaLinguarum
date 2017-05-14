@@ -67,6 +67,10 @@ public class Map extends JMapViewer implements IObservable {
 	private ControlPanel controlPanel;
 	
 	private boolean isParseFailed = false;
+	/**
+	 * if true, use simple colours; if false, use textures
+	 */
+	private boolean simpleRender = true;
 	
 	/**
 	 * constructs a Map and initializes settings; loads MapData;
@@ -285,29 +289,45 @@ public class Map extends JMapViewer implements IObservable {
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
 		notifyObservers();
+		LanguagePolygon renderLast = null;
 		for (LanguagePolygon lp : lpCollection) {
 			if (lp == mouseoveredLP) {
+				//if the lp is highlighted, skip for now and render after the loop so it's on top
 				lp.setIsHighlighted(true);
+				renderLast = lp;
+				continue;
 			}
 			else {
 				lp.setIsHighlighted(false);
 			}
-			List<Polygon> polys = lp.getPolygons();
-			if (polys == null) {
-				continue;
-			}
-			for (Polygon poly : polys) {
-				if (poly != null) {
-					g2d.setColor( lp.getColor() );
+			paintPolygon(lp, g2d);
+		}
+		
+		if (renderLast != null) {
+			paintPolygon(renderLast, g2d);
+		}
+	}
+	
+	/**
+	 * paint a single LanguagePolygon collection, which cannot be null
+	 */
+	private void paintPolygon(LanguagePolygon lp, Graphics2D g2d) {
+		g2d.setColor(lp.getColor());
+		List<Polygon> polys = lp.getPolygons();
+		if (polys == null) {
+			return;
+		}
+		for (Polygon poly : polys) {
+			if (poly != null) {
+				if (simpleRender) {
 					g2d.fill(poly);
-
-					//TODO: make this work maybe
-//					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//					g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,
-//							RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-//					g2d.setPaint(new TexturePaint(lp.getTexture().getImage(),
-//							new Rectangle2D.Float(0, 0, TexturePattern.WIDTH, TexturePattern.HEIGHT)));
-//					g2d.fill(poly);
+				}
+				else {
+					Rectangle2D polyRect = poly.getBounds2D();
+					Rectangle2D rect = new Rectangle2D.Float( (int) polyRect.getMinX(), (int) polyRect.getMinY(),
+							TexturePattern.WIDTH, TexturePattern.HEIGHT);
+					g2d.setPaint(new TexturePaint(lp.getTexture().getImage(), rect));
+					g2d.fill(poly);
 				}
 			}
 		}
@@ -367,9 +387,25 @@ public class Map extends JMapViewer implements IObservable {
 		}
 	}
 	
+	//accessors
 	public MapData getData() { return data; }
 	public ViewMode getViewMode() { return viewMode; }
 	public void setViewMode(ViewMode vm) { viewMode = vm; }
+	/**
+	 * @return if true, use simple colours; if false, use textures
+	 */
+	public boolean getSimpleRender() { return simpleRender; }
+	/**
+	 * 
+	 * 
+	 * @param b if true, use simple colours; if false, use textures
+	 */
+	public void setSimpleRender(boolean b) {
+		if (simpleRender != b) {
+			simpleRender = b;
+			repaint();
+		}
+	}
 	/**
 	 * this setter also calls an update if selection mode is changed
 	 */

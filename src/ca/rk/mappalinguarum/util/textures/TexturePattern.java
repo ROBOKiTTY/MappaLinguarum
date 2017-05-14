@@ -3,123 +3,204 @@ package ca.rk.mappalinguarum.util.textures;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import ca.rk.mappalinguarum.ui.Map;
+import ca.rk.mappalinguarum.ui.ViewMode;
 import ca.rk.mappalinguarum.ui.interfaces.IObserver;
 import ca.rk.mappalinguarum.util.Colour;
 
 /**
  * a texture pattern that is drawn on a polygon
  * 
+ * some code based on this Stack Exchange thread:
+ * https://gamedev.stackexchange.com/questions/23625/how-do-you-generate-tileable-perlin-noise 
+ * 
  * @author RK
  *
  */
 public class TexturePattern implements IObserver {
-	public static final int WIDTH = 100;
-	public static final int HEIGHT = 100;
+	public static final int WIDTH = 32;
+	public static final int HEIGHT = 32;
+	private static final int NOISE_PERIOD = 32; 
+	private static final int[] PERMUTATIONS = generatePermutations();
+	private static final double[][] GRADIENT_DIRECTIONS = computeGradientDirections();
+	private static final double FREQUENCY = 1 / 16.0;
+	private static final int OCTAVES = 3;
 	
+	private Map map;
 	private Colour background;
+	private Colour familyBackground;
 	private BufferedImage image;
+	private BufferedImage familyImage;
 	private boolean isBrightened = false;
 	
-	public TexturePattern(Colour background) {
+	public TexturePattern(Map m, Colour background, Colour familyBackground) {
+		map = m;
 		this.background = background;
+		this.familyBackground = familyBackground;
 		image=  new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		familyImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		shufflePermutations();
 		generateTexturePattern();
 	}
 	
 	/**
-	 * draw texture pattern onto image
+	 * generate an array of unsigned ints from 1~NOISE_PERIOD 
+	 * 
+	 * @return array of int
+	 */
+	private static int[] generatePermutations() {
+		int[] perms = new int[NOISE_PERIOD];
+		for (int i = 0; i < NOISE_PERIOD; ++i) {
+			perms[i] = i;
+		}
+		
+		return perms;
+	}
+	
+	/**
+	 * shuffle array of permutations
+	 * 
+	 * @return shuffled array
+	 */
+	private static int[] shufflePermutations() {
+		int[] perms = PERMUTATIONS;
+		
+		int index;
+		int temp;
+		Random rng = new Random();
+		for (int i = NOISE_PERIOD - 1; i > 0; --i) {
+			index = rng.nextInt(i + 1);
+			temp = perms[index];
+			perms[index] = perms[i];
+			perms[i] = temp;
+		}
+		
+		return perms;
+	}
+	
+	/**
+	 * compute a two-dimensional array of double of NOISE_PERIOD
+	 * 
+	 * @return two-d array of double
+	 */
+	private static double[][] computeGradientDirections() {
+		double[][] gradDirs = new double[NOISE_PERIOD][2];
+		for (int i = 0; i < NOISE_PERIOD; ++i) {
+			gradDirs[i][0] = Math.cos((i + 1) * 2 * Math.PI / NOISE_PERIOD);
+			gradDirs[i][1] = Math.sin((i + 1) * 2 * Math.PI / NOISE_PERIOD);
+		}
+		
+		return gradDirs;
+	}
+	
+	private interface TwoIntsToDoubleOperator {
+		double run(int x, int y);
+	}
+	
+	/**
+	 * tilable Perlin noise
+	 * 
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @param period up to 256
+	 * @return noise
+	 */
+	private double makeTilingNoise(double x, double y, int period) {
+		TwoIntsToDoubleOperator surflet = (gridX, gridY) -> {
+			double distX = Math.abs(x - gridX);
+			double distY = Math.abs(y - gridY);
+			double polyX = 1 - 6 * Math.pow(distX, 5) + 15 * Math.pow(distX, 4) - 10 * Math.pow(distX, 3);
+			double polyY = 1 - 6 * Math.pow(distY, 5) + 15 * Math.pow(distY, 4) - 10 * Math.pow(distY, 3);
+			int hashIndex = PERMUTATIONS[gridX % period] + gridY % period;
+			if (hashIndex >= NOISE_PERIOD) {
+				hashIndex = NOISE_PERIOD - 1;
+			}
+			else if (hashIndex < 0) {
+				hashIndex = 0;
+			}
+			int hash = PERMUTATIONS[hashIndex];
+			double grad = (x - gridX) * GRADIENT_DIRECTIONS[hash][0] + (y - gridY) * GRADIENT_DIRECTIONS[hash][1];
+			
+			return polyX * polyY * grad;
+		};
+		
+		final int iX = (int) x;
+		final int iY = (int) y;
+		
+		double result = surflet.run(iX + 0, iY + 0) + surflet.run(iX + 1, iY + 0) +
+						surflet.run(iX + 0, iY + 1) + surflet.run(iX + 1, iY + 1);
+		
+		return result;
+	}
+	
+	/**
+	 * fractional brownian motion function
+	 * 
+	 * @param x
+	 * @param y
+	 * @param period
+	 * @param octaves
+	 * @return
+	 */
+	private double fBm(double x, double y, int period, int octaves) {
+		double result = 0;
+		for (int i = 1; i <= octaves; ++i) {
+			result += Math.pow(0.5, i) *
+					makeTilingNoise(x * Math.pow(2, i),
+									y * Math.pow(2, i),
+									period * (int) Math.pow(2, i));
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * draw texture pattern onto images
 	 */
 	private void generateTexturePattern() {
-		int r = background.getRed();
-		int g = background.getGreen();
-		int b = background.getBlue();
-		float[] hsl = Colour.rgbToHSL(r, g, b);
-		
-		int luminosity;
-		double[][] noise = generateNoise();
+		Colour foreground = Colour.lightenColour(background);
+		Colour familyForeground = Colour.lightenColour(familyBackground);
+		double noise;
 		for (int x = 0; x < WIDTH; ++x) {
 			for (int y = 0; y < HEIGHT; ++y) {
-				luminosity = 192 + (int) turbulence(x, y, 64, noise) / 4;
-				Colour colour = Colour.fromHSL( (int)(hsl[0] * 255), (int)(hsl[1] * 255), luminosity);
-				image.setRGB(x, y,
-						Colour.toInt(Colour.TRANSPARENCY, colour.getRed(),  colour.getGreen(),  colour.getBlue() ) );
+				noise = fBm(x * FREQUENCY, y * FREQUENCY, (int) (WIDTH * FREQUENCY), OCTAVES);
+				noise = (noise + 1) / 2.0; //normalize to 0-1
+				if (noise <= 0.5) {
+					image.setRGB(x, y, Colour.toInt(Colour.TRANSPARENCY,
+							background.getRed(), background.getGreen(), background.getBlue()));
+					familyImage.setRGB(x, y, Colour.toInt(Colour.TRANSPARENCY,
+							familyBackground.getRed(), familyBackground.getGreen(), familyBackground.getBlue()));
+				}
+				else {
+					image.setRGB(x, y, Colour.toInt(Colour.TRANSPARENCY,
+							foreground.getRed(), foreground.getGreen(), foreground.getBlue()));
+					familyImage.setRGB(x, y, Colour.toInt(Colour.TRANSPARENCY,
+							familyForeground.getRed(), familyForeground.getGreen(), familyForeground.getBlue()));
+				}
 			}
 		}
-	}
-	
-	/**
-	 * @return a noise map WIDTH x HEIGHT
-	 */
-	private double[][] generateNoise() {
-		Random rng = new Random();
-		
-		double[][] noise = new double[WIDTH][HEIGHT];
-		
-		for (int y = 0; y < HEIGHT; ++y) {
-			for (int x = 0; x < WIDTH; ++x) {
-				noise[y][x] = rng.nextGaussian();
-			}
-		}
-		
-		return noise;
-	}
-	
-	/**
-	 * smooth out noise using bilinear interpolation
-	 * @return average of four neighbouring pixels
-	 */
-	private double smoothNoise(double x, double y, double[][] noise) {
-		double fractX = x - (int)x;
-		double fractY = y - (int)y;
-		
-		int x1 = ((int)x + WIDTH) % WIDTH;
-		int y1 = ((int)y + HEIGHT) % HEIGHT;
-		
-		int x2 = (x1 + WIDTH - 1) % WIDTH;
-		int y2 = (y1 + HEIGHT - 1) % HEIGHT;
-		
-		double avg = 0;
-		avg += fractX * fractY * noise[y1][x1];
-		avg += (1 - fractX) * fractY * noise[y1][x2];
-		avg += fractX * (1 - fractY) * noise[y2][x1];
-		avg += (1 - fractX) * (1 - fractY) * noise[y2][x2];
-		
-		return avg;
-	}
-	
-	private double turbulence(double x, double y, double size, double[][] noise) {
-		double value = 0;
-		double initialSize = size;
-		
-		while (size >= 1) {
-			value += smoothNoise(x / size, y / size, noise) * size;
-			size /= 2;
-		}
-		
-		return 128 * value / initialSize;
 	}
 
 	@Override
 	public void update() {
-		//TODO: make this work maybe
-//		if (isBrightened) {
-//			for (int x = 0; x < WIDTH; ++x) {
-//				for (int y = 0; y < HEIGHT; ++y) {
-//					int argb = image.getRGB(x, y);
-//					argb = Colour.darkenARGB(argb);
-//					image.setRGB(x, y, argb);
-//				}
-//			}
-//		}
-//		else {
-//			for (int x = 0; x < WIDTH; ++x) {
-//				for (int y = 0; y < HEIGHT; ++y) {
-//					int argb = image.getRGB(x, y);
-//					argb = Colour.lightenARGB(argb);
-//					image.setRGB(x, y, argb);
-//				}
-//			}
-//		}
+		if (isBrightened) {
+			for (int x = 0; x < WIDTH; ++x) {
+				for (int y = 0; y < HEIGHT; ++y) {
+					int argb = getImage().getRGB(x, y);
+					argb = Colour.darkenARGB(argb);
+					getImage().setRGB(x, y, argb);
+				}
+			}
+		}
+		else {
+			for (int x = 0; x < WIDTH; ++x) {
+				for (int y = 0; y < HEIGHT; ++y) {
+					int argb = getImage().getRGB(x, y);
+					argb = Colour.lightenARGB(argb);
+					getImage().setRGB(x, y, argb);
+				}
+			}
+		}
 		
 		isBrightened = !isBrightened;
 	}
@@ -162,6 +243,16 @@ public class TexturePattern implements IObserver {
 		return true;
 	}
 
-	public BufferedImage getImage() { return image; }
+	public BufferedImage getImage() {
+		ViewMode viewMode = map.getViewMode();
+		switch(viewMode) {
+			case FAMILIES:
+				return familyImage;
+			case MOSAIC:
+				return image;
+			default:
+				return image;
+		}
+	}
 	public void setBackgroundColour(Colour background) { this.background = background; }
 }

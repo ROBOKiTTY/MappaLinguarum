@@ -19,7 +19,7 @@ import ca.rk.mappalinguarum.util.textures.TexturePattern;
 
 /**
  * represents a set of polygonal areas (>= 1) on the map that serves as a visual indicator of a
- * language's distribution
+ * language's geographical distribution
  * 
  * @author RK
  *
@@ -59,8 +59,8 @@ public class LanguagePolygon implements IObserver, IObservable {
 		if (polygons == null || polygons.isEmpty()) {
 			return;
 		}
-		//texture = new TexturePattern(colour);
-		//addObserver(texture);
+		texture = new TexturePattern(map, colour, familyDerivedColour);
+		addObserver(texture);
 	}
 	
 	/**
@@ -151,7 +151,6 @@ public class LanguagePolygon implements IObserver, IObservable {
 			if (polygons == null) {
 				return;
 			}
-			notifyObservers();
 			for (Polygon poly : polygons) {
 				poly.invalidate();
 			}
@@ -249,5 +248,10 @@ public class LanguagePolygon implements IObserver, IObservable {
 	public TexturePattern getTexture() { return texture; }
 	public boolean getIsHighlighted() { return isHighlighted; }
 	
-	public void setIsHighlighted(boolean b) { isHighlighted = b; }
+	public void setIsHighlighted(boolean b) {
+		if (b != isHighlighted) {
+			notifyObservers();
+		}
+		isHighlighted = b;
+	}
 }

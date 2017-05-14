@@ -19,7 +19,6 @@ public class Colour implements Iterable<Integer>{
 	public static final int MIN_VALUE = 0;
 	public static final int TRANSPARENCY = 200;
 	private static final Colour REF_WHITE = new Colour(255, 255, 255);
-	private static final Colour REF_BLACK = new Colour(0, 0, 0);
 
 	private int red;
 	private int green;
@@ -114,8 +113,7 @@ public class Colour implements Iterable<Integer>{
 	}
 	
 	/**
-	 * return a darkened shade of the input colour by mixing it with an internal
-	 * reference colour (REF_BLACK), which is black
+	 * return a darkened shade of the input colour by doing the reverse of lightenARGB
 	 * 
 	 * @param colour the base colour to work with as argb int
 	 * @return a darker colour as argb int
@@ -126,9 +124,9 @@ public class Colour implements Iterable<Integer>{
 		int g = (argb >> 8) & 0xff;
 		int b = argb & 0xff;
 		
-		r = (r + REF_BLACK.red) / 2;
-		g = (g + REF_BLACK.green) / 2;
-		b = (b + REF_BLACK.bloo) / 2;
+		r = r * 2 - REF_WHITE.red;
+		g = g * 2 - REF_WHITE.green;
+		b = b * 2 - REF_WHITE.bloo;
 		
 		return toInt(a, r, g, b);
 	}
@@ -149,16 +147,15 @@ public class Colour implements Iterable<Integer>{
 	}
 	
 	/**
-	 * return a darkened shade of the input colour by mixing it with an internal
-	 * reference colour (REF_BLACK), which is black
+	 * return a darkened shade of the input colour by doing the reverse of lightenColour
 	 * 
 	 * @param colour the base Colour to work with
 	 * @return a darker Colour
 	 */
 	public static Colour darkenColour(Colour colour) {
-		int r = (colour.red + REF_BLACK.getRed() ) / 2;
-		int g = (colour.green + REF_BLACK.getGreen() ) / 2;
-		int b = (colour.bloo + REF_BLACK.getBlue() ) / 2;
+		int r = colour.red * 2 - REF_WHITE.getRed();
+		int g = colour.green * 2 - REF_WHITE.getGreen();
+		int b = colour.bloo * 2 - REF_WHITE.getBlue();
 
 		return new Colour(r, g, b);
 	}

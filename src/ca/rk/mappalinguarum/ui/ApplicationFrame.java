@@ -70,6 +70,7 @@ public class ApplicationFrame extends JFrame {
 	private JScrollPane textPane;
 	private ControlPanel controlPanel;
 	private Map map;
+	private boolean isMapInitialized = false;
 	
 	/**
 	 * constructs an ApplicationFrame, setting its dimensions and fields, and calls UI construction methods
@@ -216,6 +217,7 @@ public class ApplicationFrame extends JFrame {
 						mapAndControlSplitPane.remove(mapPlaceholder);
 						mapAndControlSplitPane.add(map);
 						controlPanel.initiateControlBoxContents();
+						isMapInitialized = true;
 					}
 					catch (SecurityException e) {
 						TextConsole.writeLine("Failure to access system property for security reasons. Please check "
@@ -242,7 +244,12 @@ public class ApplicationFrame extends JFrame {
 	}
 	
 	//accessors
-	public Map getMap() { return map; }
+	public JPanel getMap() {
+		if (isMapInitialized) {
+			return map;
+		}
+		return mapPlaceholder;
+	}
 	public ControlPanel getControlPanel() { return controlPanel; }
 	public JScrollPane getTextPane() { return textPane; }
 	public JSplitPane getMapAndControlSplitPane() { return mapAndControlSplitPane; }

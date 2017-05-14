@@ -26,6 +26,7 @@ public class ApplicationMenu extends JMenuBar {
 	private final JMenu menuFile;
 	private final JMenuItem fileItemExit;
 	private final JMenu menuView;
+	private final JMenuItem viewItemTexturedPolygons;
 	private final JMenuItem viewItemShowHideControlBox;
 	private final JMenuItem viewItemShowHideMap;
 	private final JMenuItem viewItemShowHideConsole;
@@ -61,6 +62,23 @@ public class ApplicationMenu extends JMenuBar {
 		//View
 		menuView = new JMenu("View");
 		menuView.setMnemonic(KeyEvent.VK_V);
+		//View->Switch area colouring to textured/simple
+		viewItemTexturedPolygons = new JMenuItem("Switch area colouring to textured");
+		viewItemTexturedPolygons.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				Map map = (Map) mainWindow.getMap();
+				boolean simpleRender = map.getSimpleRender();
+				if (simpleRender) {
+					viewItemTexturedPolygons.setText("Switch area colouring to simple");
+				}
+				else {
+					viewItemTexturedPolygons.setText("Switch area colouring to textured");
+				}
+				map.setSimpleRender(!simpleRender);
+			}
+		});
 		//View->Show/Hide Selection Control Box
 		viewItemShowHideControlBox = new JMenuItem("Hide Selection Control Box/Infoboxes");
 		viewItemShowHideControlBox.setMnemonic(KeyEvent.VK_S);
@@ -131,7 +149,7 @@ public class ApplicationMenu extends JMenuBar {
 		viewMosaicToggle.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Map m = mainWindow.getMap();
+				Map m = (Map) mainWindow.getMap();
 				m.setViewMode(ViewMode.MOSAIC);
 				viewMosaicToggle.setText("✓ Mosaic View Mode");
 				viewFamilyToggle.setText("Family View Mode");
@@ -143,7 +161,7 @@ public class ApplicationMenu extends JMenuBar {
 		viewFamilyToggle.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Map m = mainWindow.getMap();
+				Map m = (Map) mainWindow.getMap();
 				m.setViewMode(ViewMode.FAMILIES);
 				viewMosaicToggle.setText("Mosaic View Mode");
 				viewFamilyToggle.setText("✓ Family View Mode");
@@ -154,7 +172,7 @@ public class ApplicationMenu extends JMenuBar {
 		viewOneOf.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Map m = mainWindow.getMap();
+				Map m = (Map) mainWindow.getMap();
 				m.setSelectionMode(SelectionMode.ONE_OF);
 				viewOneOf.setText("✓ Display languages matching any selected option");
 				viewAllOf.setText("Display only languages matching all selected options");
@@ -165,13 +183,15 @@ public class ApplicationMenu extends JMenuBar {
 		viewAllOf.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Map m = mainWindow.getMap();
+				Map m = (Map) mainWindow.getMap();
 				m.setSelectionMode(SelectionMode.ALL_OF);
 				viewOneOf.setText("Display languages matching any selected option");
 				viewAllOf.setText("✓ Display only languages matching all selected options");
 			}
 		});
 		//putting View together
+		menuView.add(viewItemTexturedPolygons);
+		menuView.addSeparator();
 		menuView.add(viewItemShowHideControlBox);
 		menuView.add(viewItemShowHideMap);
 		menuView.add(viewItemShowHideConsole);
