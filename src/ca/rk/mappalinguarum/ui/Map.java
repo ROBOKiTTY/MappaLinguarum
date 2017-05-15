@@ -396,7 +396,7 @@ public class Map extends JMapViewer implements IObservable {
 	 */
 	public boolean getSimpleRender() { return simpleRender; }
 	/**
-	 * 
+	 * sets simpleRender and calls for the component to repaint itself
 	 * 
 	 * @param b if true, use simple colours; if false, use textures
 	 */

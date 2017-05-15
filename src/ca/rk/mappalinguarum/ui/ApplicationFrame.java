@@ -244,7 +244,12 @@ public class ApplicationFrame extends JFrame {
 	}
 	
 	//accessors
-	public JPanel getMap() {
+	/**
+	 * if the placeholder is returned, a cast to Map will fail
+	 * 
+	 * @return map if it's been properly loaded; otherwise returns the placeholder empty component
+	 */
+	public JPanel getMapComponent() {
 		if (isMapInitialized) {
 			return map;
 		}

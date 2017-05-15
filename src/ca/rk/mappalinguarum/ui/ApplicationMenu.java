@@ -66,9 +66,9 @@ public class ApplicationMenu extends JMenuBar {
 		viewItemTexturedPolygons = new JMenuItem("Switch area colouring to textured");
 		viewItemTexturedPolygons.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				Map map = (Map) mainWindow.getMap();
+			public void actionPerformed(ActionEvent e) {
+				Map map = getAndCastMap();
+				if (map == null) { return; }
 				boolean simpleRender = map.getSimpleRender();
 				if (simpleRender) {
 					viewItemTexturedPolygons.setText("Switch area colouring to simple");
@@ -87,13 +87,11 @@ public class ApplicationMenu extends JMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				boolean isVisible = mainWindow.getControlPanel().getControlAndInfoSplitPane().isVisible();
 				mainWindow.getControlPanel().getControlAndInfoSplitPane().setVisible(!isVisible);
-				if (isVisible)
-				{
+				if (isVisible) {
 					mainWindow.getMapAndControlSplitPane().setDividerLocation(1d);
 					viewItemShowHideControlBox.setText("Show Selection Control Box/Infoboxes");
 				}
-				else
-				{
+				else {
 					mainWindow.getMapAndControlSplitPane().setDividerLocation(0.65);
 					viewItemShowHideControlBox.setText("Hide Selection Control Box/Infoboxes");
 				}
@@ -106,15 +104,13 @@ public class ApplicationMenu extends JMenuBar {
 		viewItemShowHideMap.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				boolean isVisible = mainWindow.getMap().isVisible();
-				mainWindow.getMap().setVisible(!isVisible);
-				if (isVisible)
-				{
+				boolean isVisible = mainWindow.getMapComponent().isVisible();
+				mainWindow.getMapComponent().setVisible(!isVisible);
+				if (isVisible) {
 					mainWindow.getMapAndControlSplitPane().setDividerLocation(0d);
 					viewItemShowHideMap.setText("Show Map");
 				}
-				else
-				{
+				else {
 					mainWindow.getMapAndControlSplitPane().setDividerLocation(0.75);
 					viewItemShowHideMap.setText("Hide Map");
 				}
@@ -130,13 +126,11 @@ public class ApplicationMenu extends JMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				boolean isVisible = mainWindow.getTextPane().isVisible();
 				mainWindow.getTextPane().setVisible(!isVisible);
-				if (isVisible)
-				{
+				if (isVisible) {
 					mainWindow.getTopAndBottomSplitPane().setDividerLocation(1d);
 					viewItemShowHideConsole.setText("Show Bottom Console");
 				}
-				else
-				{
+				else {
 					mainWindow.getTopAndBottomSplitPane().setDividerLocation(0.8d);
 					viewItemShowHideConsole.setText("Hide Bottom Console");
 				}
@@ -149,7 +143,8 @@ public class ApplicationMenu extends JMenuBar {
 		viewMosaicToggle.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Map m = (Map) mainWindow.getMap();
+				Map m = getAndCastMap();
+				if (m == null) { return; }
 				m.setViewMode(ViewMode.MOSAIC);
 				viewMosaicToggle.setText("✓ Mosaic View Mode");
 				viewFamilyToggle.setText("Family View Mode");
@@ -161,7 +156,8 @@ public class ApplicationMenu extends JMenuBar {
 		viewFamilyToggle.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Map m = (Map) mainWindow.getMap();
+				Map m = getAndCastMap();
+				if (m == null) { return; }
 				m.setViewMode(ViewMode.FAMILIES);
 				viewMosaicToggle.setText("Mosaic View Mode");
 				viewFamilyToggle.setText("✓ Family View Mode");
@@ -172,7 +168,8 @@ public class ApplicationMenu extends JMenuBar {
 		viewOneOf.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Map m = (Map) mainWindow.getMap();
+				Map m = getAndCastMap();
+				if (m == null) { return; }
 				m.setSelectionMode(SelectionMode.ONE_OF);
 				viewOneOf.setText("✓ Display languages matching any selected option");
 				viewAllOf.setText("Display only languages matching all selected options");
@@ -183,7 +180,8 @@ public class ApplicationMenu extends JMenuBar {
 		viewAllOf.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Map m = (Map) mainWindow.getMap();
+				Map m = getAndCastMap();
+				if (m == null) { return; }
 				m.setSelectionMode(SelectionMode.ALL_OF);
 				viewOneOf.setText("Display languages matching any selected option");
 				viewAllOf.setText("✓ Display only languages matching all selected options");
@@ -240,5 +238,26 @@ public class ApplicationMenu extends JMenuBar {
 		this.add(menuFile);
 		this.add(menuView);
 		this.add(menuHalp);
+	}
+	
+	/**
+	 * helper method to get the map component and try to cast it to Map,
+	 * expects a ClassCastException if the cast fails, and will handle it by
+	 * printing an error message
+	 * 
+	 * @return the map component, null if attempt fails
+	 */
+	private Map getAndCastMap() {
+		Map map = null;
+		try {
+			map = (Map) mainWindow.getMapComponent();
+		}
+		catch (ClassCastException e) {
+			//most likely this means map has not loaded properly and placeholder
+			//component was returned, so print an error message and return null
+			TextConsole.writeLine("The operation failed because the map did not load.");
+		}
+		
+		return map;
 	}
 }

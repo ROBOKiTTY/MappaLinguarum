@@ -69,7 +69,7 @@ public class TextConsole {
 	
 	/**
 	 * append a text message to the text console, automagically adding a linebreak after;
-	 * does nothing if textConsole is null
+	 * does nothing if textConsole is null; also forwards message to System.out
 	 * 
 	 * @param text input text message
 	 */
@@ -83,6 +83,7 @@ public class TextConsole {
 			}
 		};
 		SwingUtilities.invokeLater(r);
+		System.out.println(_text);
 	}
 	
 	/**
