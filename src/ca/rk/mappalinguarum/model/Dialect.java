@@ -144,7 +144,7 @@ public class Dialect {
 	public PhonemeInventory getPhonemeInventory() { return phonemeInventory; }
 	public String getInformation() { return information; }
 	
-	public void setNames(List<String> list) { names = list; }
-	public void setPhonemeInventory(PhonemeInventory pi) { phonemeInventory = pi; }
-	public void setInformation(String s) { information = s; }
+	public Dialect setNames(List<String> list) { names = list; return this; }
+	public Dialect setPhonemeInventory(PhonemeInventory pi) { phonemeInventory = pi;  return this; }
+	public Dialect setInformation(String s) { information = s;  return this; }
 }

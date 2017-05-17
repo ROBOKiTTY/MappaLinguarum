@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * class describing a feature of a language
+ * class describing a feature of a language, in the colloquial rather than phonological sense
  * 
  * @author RK
  *

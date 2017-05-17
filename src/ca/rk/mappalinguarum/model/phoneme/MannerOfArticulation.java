@@ -7,7 +7,7 @@ package ca.rk.mappalinguarum.model.phoneme;
  *
  */
 
-public enum MannerOfArticulation {
+public enum MannerOfArticulation implements PhonologicalFeature {
 	
 	Nasal ("Nasal", "Nas"),
 	Plosive ("Plosive", "Plos"),
@@ -49,12 +49,12 @@ public enum MannerOfArticulation {
 	/**
 	 * construct a MannerOfArticulation whose string representations are the same as input
 	 * 
-	 * @param s1 full display name
-	 * @param s2 shortened name
+	 * @param full full display name
+	 * @param shrt shortened name
 	 */
-	private MannerOfArticulation(String s1, String s2) {
-		fullName = s1;
-		shortName = s2;
+	private MannerOfArticulation(String full, String shrt) {
+		fullName = full;
+		shortName = shrt;
 	}
 	
 	/**
@@ -82,5 +82,6 @@ public enum MannerOfArticulation {
 		return shortName;
 	}
 	
+	@Override
 	public String getFullName() { return fullName; }
 }

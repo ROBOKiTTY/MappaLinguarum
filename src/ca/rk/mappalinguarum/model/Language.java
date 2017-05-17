@@ -237,8 +237,8 @@ public class Language {
 	public List<String> getLinks() {return links; }
 	public PhonemeInventory getPhonemeInventory() { return phonemeInventory; }
 	
-	public void setLocation(Location l) { location = l; }
-	public void setInformation(String s) { information = s; }
-	public void setPhonemeInventory(PhonemeInventory pi) { phonemeInventory = pi; }
+	public Language setLocation(Location l) { location = l; return this; }
+	public Language setInformation(String s) { information = s; return this; }
+	public Language setPhonemeInventory(PhonemeInventory pi) { phonemeInventory = pi; return this; }
 
 }

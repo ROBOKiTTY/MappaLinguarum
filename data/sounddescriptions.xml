@@ -537,31 +537,31 @@
 	<consonant>
 		<symbol>tʃ</symbol>
 		<voice>false</voice>
-		<place>palatal alveolar</place>
+		<place>palatal-alveolar</place>
 		<manner>affricate</manner>
 	</consonant>
 	<consonant>
 		<symbol>č</symbol>
 		<voice>false</voice>
-		<place>palatal alveolar</place>
+		<place>palatal-alveolar</place>
 		<manner>affricate</manner>
 	</consonant>
 	<consonant>
 		<symbol>dʒ</symbol>
 		<voice>true</voice>
-		<place>palatal alveolar</place>
+		<place>palatal-alveolar</place>
 		<manner>affricate</manner>
 	</consonant>
 	<consonant>
 		<symbol>tɕ</symbol>
 		<voice>false</voice>
-		<place>alveolar palatal</place>
+		<place>alveolar-palatal</place>
 		<manner>affricate</manner>
 	</consonant>
 	<consonant>
 		<symbol>dʑ</symbol>
 		<voice>true</voice>
-		<place>alveolar palatal</place>
+		<place>alveolar-palatal</place>
 		<manner>affricate</manner>
 	</consonant>
 	<consonant>
@@ -810,61 +810,268 @@
 		<height>low</height>
 		<rounded>true</rounded>
 	</vowel>
-	<diacritic>̥</diacritic>
-	<diacritic>̤</diacritic>
-	<diacritic>̪</diacritic>
-	<diacritic>̬</diacritic>
-	<diacritic>̰</diacritic>
-	<diacritic>̺</diacritic>
-	<diacritic>ʰ</diacritic>
-	<diacritic>ʱ</diacritic>
-	<diacritic>̼</diacritic>
-	<diacritic>̻</diacritic>
-	<diacritic>̹</diacritic>
-	<diacritic>ʷ</diacritic>
-	<diacritic>̃</diacritic>
-	<diacritic>̜</diacritic>
-	<diacritic>ʲ</diacritic>
-	<diacritic>ⁿ</diacritic>
-	<diacritic>̟</diacritic>
-	<diacritic>ˠ</diacritic>
-	<diacritic>ˡ</diacritic>
-	<diacritic>̠</diacritic>
-	<diacritic>ˤ</diacritic>
-	<diacritic>̚</diacritic>
-	<diacritic>̈</diacritic>
-	<diacritic>̴</diacritic>
-	<diacritic>̽</diacritic>
-	<diacritic>̝</diacritic>
-	<diacritic>˔</diacritic>
-	<diacritic>̩</diacritic>
-	<diacritic>̞</diacritic>
-	<diacritic>˕</diacritic>
-	<diacritic>̯</diacritic>
-	<diacritic>̘</diacritic>
-	<diacritic>˞</diacritic>
-	<diacritic>̙</diacritic>
-	<diacritic>̋</diacritic>
-	<diacritic>́</diacritic>
-	<diacritic>̄</diacritic>
-	<diacritic>̀</diacritic>
-	<diacritic>̏</diacritic>
-	<diacritic>ʼ</diacritic>
-	<diacritic>ˀ</diacritic>
-	<diacritic>͡</diacritic>
-	<diacritic>͜</diacritic>
-	<diacritic>ː</diacritic>
-	<diacritic>:</diacritic>
-	<diacritic>ˑ</diacritic>
-	<diacritic>̆</diacritic>
-	<diacritic>‿</diacritic>
-	<diacritic>↓</diacritic>
-	<diacritic>↑</diacritic>
-	<diacritic>↗</diacritic>
-	<diacritic>↘</diacritic>
-	<diacritic>̌</diacritic>
-	<diacritic>̂</diacritic>
-	<diacritic>᷄</diacritic>
-	<diacritic>᷅</diacritic>
-	<diacritic>᷈</diacritic>
+	<diacritic>
+		<diacritic-symbol>̥</diacritic-symbol>
+		<diacritic-feature>Voiceless</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̊</diacritic-symbol>
+		<diacritic-feature>Voiceless</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̤</diacritic-symbol>
+		<diacritic-feature>Breathy voiced</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̪</diacritic-symbol>
+		<diacritic-feature>Dental</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̬</diacritic-symbol>
+		<diacritic-feature>Voiced</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̰</diacritic-symbol>
+		<diacritic-feature>Creaky voiced</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̺</diacritic-symbol>
+		<diacritic-feature>Apical</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ʰ</diacritic-symbol>
+		<diacritic-feature>Aspirated</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ʱ</diacritic-symbol>
+		<diacritic-feature>Breathy voiced</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̼</diacritic-symbol>
+		<diacritic-feature>Linguolabial</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̻</diacritic-symbol>
+		<diacritic-feature>Laminal</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̹</diacritic-symbol>
+		<diacritic-feature>More rounded</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ʷ</diacritic-symbol>
+		<diacritic-feature>Labialized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ᶣ</diacritic-symbol>
+		<diacritic-feature>Labio-palatalized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ᶹ</diacritic-symbol>
+		<diacritic-feature>Labialized without protrusion of the lips or velarization</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̃</diacritic-symbol>
+		<diacritic-feature>Nasalized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̜</diacritic-symbol>
+		<diacritic-feature>Less rounded</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ʲ</diacritic-symbol>
+		<diacritic-feature>Palatalized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ⁿ</diacritic-symbol>
+		<diacritic-feature>Nasal release</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̟</diacritic-symbol>
+		<diacritic-feature>Advanced</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ˠ</diacritic-symbol>
+		<diacritic-feature>Velarized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ˡ</diacritic-symbol>
+		<diacritic-feature>Lateral release</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ᶿ</diacritic-symbol>
+		<diacritic-feature>Voiceless dental fricative release</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ˣ</diacritic-symbol>
+		<diacritic-feature>Voiceless velar fricative release</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ᵊ</diacritic-symbol>
+		<diacritic-feature>Mid-central vowel release</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̠</diacritic-symbol>
+		<diacritic-feature>Retracted</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>˗</diacritic-symbol>
+		<diacritic-feature>Retracted</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ˤ</diacritic-symbol>
+		<diacritic-feature>Pharyngealized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̚</diacritic-symbol>
+		<diacritic-feature>No audible release</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̈</diacritic-symbol>
+		<diacritic-feature>Centralized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̴</diacritic-symbol>
+		<diacritic-feature>Velarized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̽</diacritic-symbol>
+		<diacritic-feature>Mid-centralized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̝</diacritic-symbol>
+		<diacritic-feature>Raised</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>˔</diacritic-symbol>
+		<diacritic-feature>Raised</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̩</diacritic-symbol>
+		<diacritic-feature>Syllabic</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̍</diacritic-symbol>
+		<diacritic-feature>Syllabic</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̞</diacritic-symbol>
+		<diacritic-feature>Lowered</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>˕</diacritic-symbol>
+		<diacritic-feature>Lowered</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̯</diacritic-symbol>
+		<diacritic-feature>Non-syllabic</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̑</diacritic-symbol>
+		<diacritic-feature>Non-syllabic</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̘</diacritic-symbol>
+		<diacritic-feature>Advanced tongue root</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>˞</diacritic-symbol>
+		<diacritic-feature>Rhoticity</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̙</diacritic-symbol>
+		<diacritic-feature>Retracted tongue root</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̋</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>́</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̄</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̀</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̏</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ʼ</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ˀ</diacritic-symbol>
+		<diacritic-feature>Glottalized</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>͡</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>͜</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ː</diacritic-symbol>
+		<diacritic-feature>Long</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>:</diacritic-symbol>
+		<diacritic-feature>Long</diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>ˑ</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̆</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>‿</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>↓</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>↑</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>↗</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>↘</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̌</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>̂</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>᷄</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>᷅</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
+	<diacritic>
+		<diacritic-symbol>᷈</diacritic-symbol>
+		<diacritic-feature></diacritic-feature>
+	</diacritic>
 </sounddescriptions>

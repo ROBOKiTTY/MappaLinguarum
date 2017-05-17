@@ -8,7 +8,8 @@ import ca.rk.mappalinguarum.util.Colour;
 import ca.rk.mappalinguarum.util.RandomColourGenerator;
 
 /**
- * Encapsulates a location on the map
+ * Encapsulates a location on the map, which can be made up of more than
+ * one contiguous regions
  * 
  * @author RK
  */
@@ -86,7 +87,7 @@ public class Location {
 	public Language getLanguage() { return language; }
 	public Colour getColour() { return colour; }
 	
-	public void setLanguage(Language language) { this.language = language; }
+	public Location setLanguage(Language language) { this.language = language; return this; }
 	
 	public class LatLongSet {
 		private double[] longitudes;

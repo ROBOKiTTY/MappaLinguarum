@@ -72,6 +72,8 @@ public class ApplicationFrame extends JFrame {
 	private Map map;
 	private boolean isMapInitialized = false;
 	
+	private ApplicationMode mode = ApplicationMode.MAP;
+	
 	/**
 	 * constructs an ApplicationFrame, setting its dimensions and fields, and calls UI construction methods
 	 */
@@ -131,6 +133,7 @@ public class ApplicationFrame extends JFrame {
 		setIconImage( APPLICATION_ICON.getImage() );
 		ToolTipManager.sharedInstance().setInitialDelay(TOOLTIP_INITIAL_DELAY);
 		ToolTipManager.sharedInstance().setDismissDelay(TOOLTIP_DISMISS_DELAY);
+		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		setVisible(true);
 		
 		//add bottom text console
@@ -154,13 +157,13 @@ public class ApplicationFrame extends JFrame {
 		
 		//set up split panes and add to this frame
 		mapAndControlSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mapPlaceholder, controlPanel);
-		mapAndControlSplitPane.setDividerLocation(0.5);
-		mapAndControlSplitPane.setResizeWeight(0.5);
+		mapAndControlSplitPane.setDividerLocation(0.45);
+		mapAndControlSplitPane.setResizeWeight(0.45);
 		this.add(mapAndControlSplitPane);
 		
 		topAndBottomSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, mapAndControlSplitPane, textPane);
-		topAndBottomSplitPane.setDividerLocation(0.75);
-		topAndBottomSplitPane.setResizeWeight(0.75);
+		topAndBottomSplitPane.setDividerLocation(0.8);
+		topAndBottomSplitPane.setResizeWeight(0.8);
 		this.add(topAndBottomSplitPane);
 		
 		TextConsole.clear();
@@ -259,6 +262,11 @@ public class ApplicationFrame extends JFrame {
 	public JScrollPane getTextPane() { return textPane; }
 	public JSplitPane getMapAndControlSplitPane() { return mapAndControlSplitPane; }
 	public JSplitPane getTopAndBottomSplitPane() { return topAndBottomSplitPane; }
+	public ApplicationMode getApplicationMode() { return mode; }
+	public ApplicationFrame setApplicationMode(ApplicationMode am) {
+		mode = am;
+		return this;
+	}
 	
 	/**
 	 * 

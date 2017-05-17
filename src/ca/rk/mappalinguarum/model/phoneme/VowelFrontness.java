@@ -7,7 +7,7 @@ package ca.rk.mappalinguarum.model.phoneme;
  *
  */
 
-public enum VowelFrontness {
+public enum VowelFrontness implements PhonologicalFeature {
 	
 	Front ("Front", "Fr"),
 	Near_Front ("Near-Front", "N-Fr"),
@@ -39,12 +39,12 @@ public enum VowelFrontness {
 	/**
 	 * construct a VowelFrontness whose string representations are the same as input
 	 * 
-	 * @param s1 a full string representation
-	 * @param s2 a short string representation
+	 * @param full a full string representation
+	 * @param shrt a short string representation
 	 */
-	private VowelFrontness(String s1, String s2) {
-		fullName = s1;
-		shortName = s2;
+	private VowelFrontness(String full, String shrt) {
+		fullName = full;
+		shortName = shrt;
 	}
 	
 	/**
@@ -63,6 +63,54 @@ public enum VowelFrontness {
 		}
 		return null;
 	}
+	
+	/**
+	 * @return a VowelFrontness advanced one level of this, so back goes to near-back, etc,
+	 * without wrapping around
+	 */
+	public VowelFrontness advanced() {
+		if (this.equals(VowelFrontness.Back)) {
+			return VowelFrontness.Near_Back;
+		}
+		else if (this.equals(VowelFrontness.Near_Back)) {
+			return VowelFrontness.Central;
+		}
+		else if (this.equals(VowelFrontness.Central)) {
+			return VowelFrontness.Near_Front;
+		}
+		else if (this.equals(VowelFrontness.Near_Front)) {
+			return VowelFrontness.Front;
+		}
+		else if (this.equals(VowelFrontness.Front)) {
+			return VowelFrontness.Front;
+		}
+		
+		throw new RuntimeException("VowelFrontness none of the above in advanced()");
+	}
+	
+	/**
+	 * @return a VowelFrontness retracted one level of this, so front goes to near-front, etc,
+	 * without wrapping around
+	 */
+	public VowelFrontness retracted() {
+		if (this.equals(VowelFrontness.Front)) {
+			return VowelFrontness.Near_Front;
+		}
+		else if (this.equals(VowelFrontness.Near_Front)) {
+			return VowelFrontness.Central;
+		}
+		else if (this.equals(VowelFrontness.Central)) {
+			return VowelFrontness.Near_Back;
+		}
+		else if (this.equals(VowelFrontness.Near_Back)) {
+			return VowelFrontness.Back;
+		}
+		else if (this.equals(VowelFrontness.Back)) {
+			return VowelFrontness.Back;
+		}
+		
+		throw new RuntimeException("VowelFrontness none of the above in retracted()");
+	}
 
 	/**
 	 * returns a short string representation
@@ -72,5 +120,6 @@ public enum VowelFrontness {
 		return shortName;
 	}
 	
+	@Override
 	public String getFullName() { return fullName; }
 }

@@ -7,14 +7,15 @@ package ca.rk.mappalinguarum.model.phoneme;
  *
  */
 
-public enum PlaceOfArticulation {
+public enum PlaceOfArticulation implements PhonologicalFeature {
 
 	Bilabial ("Bilab"),
 	Labiodental ("Labiod"),
 	Dental ("Dent"),
 	Alveolar ("Alv"),
-	Postalveolar ("Postalv"),
+	Alveolar_Palatal ("Postalv"),
 	Retroflex ("Retr"),
+	Palatal_Alveolar ("Prepal"),
 	Palatal ("Pal"),
 	Velar ("Vel"),
 	Uvular ("Uv"),
@@ -28,7 +29,7 @@ public enum PlaceOfArticulation {
 	 * implicitly constructs a PlaceOfArticulation with name as its short name
 	 */
 	private PlaceOfArticulation() {
-		shortName = this.name();
+		shortName = this.name().replace("_", "-");
 	}
 	
 	/**
@@ -65,5 +66,6 @@ public enum PlaceOfArticulation {
 		return shortName;
 	}
 	
+	@Override
 	public String getFullName() { return this.name(); }
 }

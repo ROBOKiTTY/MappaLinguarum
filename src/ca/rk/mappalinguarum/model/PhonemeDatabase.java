@@ -15,8 +15,10 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import ca.rk.mappalinguarum.exceptions.InvalidXMLException;
 import ca.rk.mappalinguarum.model.phoneme.Consonant;
+import ca.rk.mappalinguarum.model.phoneme.DistinctiveFeature;
 import ca.rk.mappalinguarum.model.phoneme.MannerOfArticulation;
 import ca.rk.mappalinguarum.model.phoneme.Phoneme;
+import ca.rk.mappalinguarum.model.phoneme.PhonologicalFeature;
 import ca.rk.mappalinguarum.model.phoneme.PlaceOfArticulation;
 import ca.rk.mappalinguarum.model.phoneme.Vowel;
 import ca.rk.mappalinguarum.model.phoneme.VowelFrontness;
@@ -39,6 +41,8 @@ public class PhonemeDatabase {
 	private boolean isParsed;
 	private List<Phoneme> phonemes;
 	private List<String> diacritics;
+	//shares the same index with diacritics
+	private List<String> diacriticFeatures;
 	
 	private String currentString;
 	private Phoneme currentPhoneme;
@@ -51,6 +55,7 @@ public class PhonemeDatabase {
 		isParsed = false;
 		phonemes = new ArrayList<Phoneme>();
 		diacritics = new ArrayList<String>();
+		diacriticFeatures = new ArrayList<String>();
 		fileToParse = new File(DEFAULT_XML_PATH);
 		parse(fileToParse, DEFAULT_HANDLER);
 	}
@@ -185,7 +190,12 @@ public class PhonemeDatabase {
 		if (c == null) {
 			return null;
 		}
-
+		
+		PhonologicalFeature pf = checkDiacritics(s);
+		if (pf instanceof PlaceOfArticulation) {
+			return (PlaceOfArticulation) pf;
+		}
+		
 		return c.getSecondaryPOA();
 	}
 	
@@ -207,11 +217,16 @@ public class PhonemeDatabase {
 		else {
 			c = (Consonant) getPhoneme(s);
 		}
-		
+
 		if (c == null) {
 			return null;
 		}
-
+		
+		PhonologicalFeature pf = checkDiacritics(s);
+		if (pf instanceof MannerOfArticulation) {
+			return (MannerOfArticulation) pf;
+		}
+		
 		return c.getMannerOfArticulation();
 	}
 	
@@ -234,12 +249,17 @@ public class PhonemeDatabase {
 		else {
 			c = (Consonant) getPhoneme(s);
 		}
-		
+
 		if (c == null) {
 			System.out.println(s);
 			throw new IllegalArgumentException();
 		}
-
+		
+		PhonologicalFeature pf = checkDiacritics(s);
+		if ( pf instanceof DistinctiveFeature && pf.getFullName().equalsIgnoreCase("Voice") ) {
+			return ((DistinctiveFeature) pf).getBinaryValue();
+		}
+		
 		return c.getIsVoiced();
 	}
 	
@@ -264,6 +284,16 @@ public class PhonemeDatabase {
 
 		if (v == null) {
 			return null;
+		}
+		
+		PhonologicalFeature pf = checkDiacritics(s);
+		if (pf instanceof DistinctiveFeature) {
+			if (pf.getFullName().equalsIgnoreCase("Advanced")) {
+				return v.getFrontness().advanced();
+			}
+			else if (pf.getFullName().equalsIgnoreCase("Retracted")) {
+				return v.getFrontness().retracted();
+			}
 		}
 		
 		return v.getFrontness();
@@ -291,7 +321,16 @@ public class PhonemeDatabase {
 		if (v == null) {
 			return null;
 		}
-		
+
+		PhonologicalFeature pf = checkDiacritics(s);
+		if (pf instanceof DistinctiveFeature) {
+			if (pf.getFullName().equalsIgnoreCase("Raised")) {
+				return v.getHeight().raised();
+			}
+			else if (pf.getFullName().equalsIgnoreCase("Lowered")) {
+				return v.getHeight().lowered();
+			}
+		}
 		return v.getHeight();
 	}
 	
@@ -319,7 +358,55 @@ public class PhonemeDatabase {
 			throw new IllegalArgumentException();
 		}
 		
+		PhonologicalFeature pf = checkDiacritics(s);
+		if ( pf instanceof DistinctiveFeature && pf.getFullName().equalsIgnoreCase("Round") ) {
+			return ((DistinctiveFeature) pf).getBinaryValue();
+		}
+		
 		return v.getIsRounded();
+	}
+	
+	/**
+	 * check an IPA symbol for diacritics that might override the base
+	 * symbol's default feature (MoA, PoA, frontness, height, roundedness, voicing)
+	 * 
+	 * @param s an IPA symbol as a string
+	 * @return feature, null if none
+	 */
+	public PhonologicalFeature checkDiacritics(String s) {
+		PhonologicalFeature pf = null;
+		for (String diacritic : diacritics) {
+			if (s.contains(diacritic)) {
+				int index = diacritics.indexOf(diacritic);
+				String feature = diacriticFeatures.get(index);
+				if (feature.equalsIgnoreCase("Voiceless")) {
+					pf = new DistinctiveFeature("Voice", false);
+				}
+				else if (feature.equalsIgnoreCase("Voiced")) {
+					pf = new DistinctiveFeature("Voice", true);
+				}
+				else if (feature.equalsIgnoreCase("Dental")) {
+					pf = PlaceOfArticulation.Dental;
+				}
+				else if (feature.equalsIgnoreCase("More rounded")) {
+					pf = new DistinctiveFeature("Round", true);
+				}
+				else if (feature.equalsIgnoreCase("Less rounded")) {
+					pf = new DistinctiveFeature("Round", false);
+				}
+				else if (feature.equalsIgnoreCase("Raised")) {
+					pf = new DistinctiveFeature("Raised", true);
+				}
+				else if (feature.equalsIgnoreCase("Advanced")) {
+					pf = new DistinctiveFeature("Advanced", true);
+				}
+				else if (feature.equalsIgnoreCase("Retracted")) {
+					pf = new DistinctiveFeature("Retracted", true);
+				}
+			}
+		}
+		
+		return pf;
 	}
 	
 	public boolean getIsParsed() { return isParsed; }
@@ -457,9 +544,16 @@ public class PhonemeDatabase {
 					isReadingVRounded = false;
 				}
 			}
-			else if ( qName.equalsIgnoreCase("diacritic") ) {
-				diacritics.add(stringifiedChars);
-				isReadingDiacritic = false;
+			else if (isReadingDiacritic) {
+				if ( qName.equalsIgnoreCase("diacritic") ) {
+					isReadingDiacritic = false;
+				}
+				else if ( qName.equalsIgnoreCase("diacritic-symbol") ) {
+					diacritics.add(stringifiedChars);
+				}
+				else if ( qName.equalsIgnoreCase("diacritic-feature") ) {
+					diacriticFeatures.add(stringifiedChars);
+				}
 			}
 		}
 	}

@@ -390,7 +390,7 @@ public class Map extends JMapViewer implements IObservable {
 	//accessors
 	public MapData getData() { return data; }
 	public ViewMode getViewMode() { return viewMode; }
-	public void setViewMode(ViewMode vm) { viewMode = vm; }
+	public Map setViewMode(ViewMode vm) { viewMode = vm; return this; }
 	/**
 	 * @return if true, use simple colours; if false, use textures
 	 */
@@ -400,21 +400,22 @@ public class Map extends JMapViewer implements IObservable {
 	 * 
 	 * @param b if true, use simple colours; if false, use textures
 	 */
-	public void setSimpleRender(boolean b) {
+	public Map setSimpleRender(boolean b) {
 		if (simpleRender != b) {
 			simpleRender = b;
 			repaint();
 		}
+		return this;
 	}
 	/**
 	 * this setter also calls an update if selection mode is changed
 	 */
-	public void setSelectionMode(SelectionMode sm) {
-		if (selectionMode == sm) {
-			return;
+	public Map setSelectionMode(SelectionMode sm) {
+		if (selectionMode != sm) {
+			selectionMode = sm;
+			updateSelectedPolygons();
 		}
-		selectionMode = sm;
-		updateSelectedPolygons();
+		return this;
 	}
 	
 	/**

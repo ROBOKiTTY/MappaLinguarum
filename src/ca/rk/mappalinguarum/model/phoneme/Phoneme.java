@@ -68,5 +68,5 @@ public abstract class Phoneme {
 	
 	public String getIPASymbol() { return ipaSymbol; }
 	
-	public void setIPASymbol(String s) { ipaSymbol = s; }
+	public Phoneme setIPASymbol(String s) { ipaSymbol = s; return this; }
 }

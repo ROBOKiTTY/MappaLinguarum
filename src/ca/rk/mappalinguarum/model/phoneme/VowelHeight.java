@@ -7,7 +7,7 @@ package ca.rk.mappalinguarum.model.phoneme;
  *
  */
 
-public enum VowelHeight {
+public enum VowelHeight implements PhonologicalFeature {
 	
 	High ("High", "High"),
 	Near_High("Near-High", "NH"),
@@ -41,12 +41,12 @@ public enum VowelHeight {
 	/**
 	 * construct a VowelHeight whose string representations are the same as input
 	 * 
-	 * @param s1 a full string representation
-	 * @param s2 a short string representation
+	 * @param full a full string representation
+	 * @param shrt a short string representation
 	 */
-	private VowelHeight(String s1, String s2) {
-		fullName = s1;
-		shortName = s2;
+	private VowelHeight(String full, String shrt) {
+		fullName = full;
+		shortName = shrt;
 	}
 	
 	/**
@@ -65,6 +65,58 @@ public enum VowelHeight {
 		}
 		return null;
 	}
+	
+	/**
+	 * @return a VowelHeight raised one level from this, without wrapping around
+	 */
+	public VowelHeight raised() {
+		if (this.equals(VowelHeight.Low)) {
+			return VowelHeight.Near_Low;
+		}
+		else if (this.equals(VowelHeight.Near_Low)) {
+			return VowelHeight.Mid_Low;
+		}
+		else if (this.equals(VowelHeight.Mid_Low)) {
+			return VowelHeight.Mid_High;
+		}
+		else if (this.equals(VowelHeight.Mid_High)) {
+			return VowelHeight.Near_High;
+		}
+		else if (this.equals(VowelHeight.Near_High)) {
+			return VowelHeight.High;
+		}
+		else if (this.equals(VowelHeight.High)) {
+			return VowelHeight.High;
+		}
+		
+		throw new RuntimeException("VowelHeight none of the above in raised()");
+	}
+	
+	/**
+	 * @return a VowelHeight lowered one level from this, without wrapping around
+	 */
+	public VowelHeight lowered() {
+		if (this.equals(VowelHeight.High)) {
+			return VowelHeight.Near_High;
+		}
+		else if (this.equals(VowelHeight.Near_High)) {
+			return VowelHeight.Mid_High;
+		}
+		else if (this.equals(VowelHeight.Mid_High)) {
+			return VowelHeight.Mid_Low;
+		}
+		else if (this.equals(VowelHeight.Mid_Low)) {
+			return VowelHeight.Near_Low;
+		}
+		else if (this.equals(VowelHeight.Near_Low)) {
+			return VowelHeight.Low;
+		}
+		else if (this.equals(VowelHeight.Low)) {
+			return VowelHeight.Low;
+		}
+		
+		throw new RuntimeException("VowelHeight none of the above in lowered()");
+	}
 
 	/**
 	 * returns a short string representation
@@ -74,5 +126,6 @@ public enum VowelHeight {
 		return shortName;
 	}
 	
+	@Override
 	public String getFullName() { return fullName; }
 }

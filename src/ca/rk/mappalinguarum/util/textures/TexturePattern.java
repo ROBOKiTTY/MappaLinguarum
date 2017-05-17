@@ -254,5 +254,5 @@ public class TexturePattern implements IObserver {
 				return image;
 		}
 	}
-	public void setBackgroundColour(Colour background) { this.background = background; }
+	public TexturePattern setBackgroundColour(Colour background) { this.background = background; return this; }
 }

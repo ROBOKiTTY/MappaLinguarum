@@ -392,7 +392,8 @@
 		<name>English</name>
 		<name>Anglais</name>
 		<family>Indo-European</family>
-		<location>0,0,0 0,0,0</location>
+		<location>0,0,0</location>
+		<location>0,0,0</location>
 		<information>Other info here</information>
 		<link>http://en.wikipedia.org/wiki/Canadian_English</link>
 	</language>

@@ -248,10 +248,11 @@ public class LanguagePolygon implements IObserver, IObservable {
 	public TexturePattern getTexture() { return texture; }
 	public boolean getIsHighlighted() { return isHighlighted; }
 	
-	public void setIsHighlighted(boolean b) {
+	public LanguagePolygon setIsHighlighted(boolean b) {
 		if (b != isHighlighted) {
 			notifyObservers();
 		}
 		isHighlighted = b;
+		return this;
 	}
 }

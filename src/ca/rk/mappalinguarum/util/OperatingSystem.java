@@ -9,7 +9,13 @@ package ca.rk.mappalinguarum.util;
 
 public class OperatingSystem {
 
-	public enum OS { MAC, WINDOWS, UNIX, UNKNOWN }
+	public enum OS {
+		MAC,
+		WINDOWS,
+		//Unix includes Linux and other Unix-likes
+		UNIX,
+		UNKNOWN
+	}
 	
 	private static OS os = null;
 	

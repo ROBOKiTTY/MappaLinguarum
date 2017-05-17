@@ -33,7 +33,7 @@ public class Vowel extends Phoneme {
 	public VowelHeight getHeight() { return height; }
 	public boolean getIsRounded() { return isRounded; }
 	
-	public void setVowelFrontness(VowelFrontness vf) { frontness = vf; }
-	public void setVowelHeight(VowelHeight vh) { height = vh; }
-	public void setIsRounded(boolean r) { isRounded = r; }
+	public Vowel setVowelFrontness(VowelFrontness vf) { frontness = vf; return this; }
+	public Vowel setVowelHeight(VowelHeight vh) { height = vh; return this; }
+	public Vowel setIsRounded(boolean r) { isRounded = r; return this; }
 }

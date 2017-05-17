@@ -35,8 +35,8 @@ public class Consonant extends Phoneme {
 	public MannerOfArticulation getMannerOfArticulation() { return manner; }
 	public boolean getIsVoiced() { return isVoiced; }
 	
-	public void setPlaceOfArticulation(PlaceOfArticulation poa) { place = poa; }
-	public void setSecondaryPOA(PlaceOfArticulation poa) { secondaryPlace = poa; }
-	public void setMannerOfArticulation(MannerOfArticulation moa) { manner = moa; }
-	public void setIsVoiced(boolean v) { isVoiced = v; }
+	public Consonant setPlaceOfArticulation(PlaceOfArticulation poa) { place = poa; return this; }
+	public Consonant setSecondaryPOA(PlaceOfArticulation poa) { secondaryPlace = poa; return this; }
+	public Consonant setMannerOfArticulation(MannerOfArticulation moa) { manner = moa; return this; }
+	public Consonant setIsVoiced(boolean v) { isVoiced = v; return this; }
 }

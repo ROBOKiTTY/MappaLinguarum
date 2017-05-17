@@ -188,12 +188,12 @@ public class ControlPanel extends JPanel {
 	public JSplitPane getControlAndInfoSplitPane() { return controlAndInfoSplitPane; }
 	public JScrollPane getInfoScrollLeft() { return infoScrollLeft; }
 	public JScrollPane getInfoScrollRight() { return infoScrollRight; }
-	public void setMap(Map m) { map = m; }
+	public ControlPanel setMap(Map m) { map = m; return this; }
 
 	/**
 	 * for thread safety, this setter is invoked on Swing's event thread
 	 */
-	public void setInfoBoxLeftText(String s) {
+	public ControlPanel setInfoBoxLeftText(String s) {
 		final String _s = s;
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -202,12 +202,13 @@ public class ControlPanel extends JPanel {
 				infoBoxLeft.setCaretPosition(0);
 			}
 		});
+		return this;
 	}
 
 	/**
 	 * for thread safety, this setter is invoked on Swing's event thread
 	 */
-	public void setInfoBoxRightText(String s) {
+	public ControlPanel setInfoBoxRightText(String s) {
 		final String _s = s;
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -216,5 +217,6 @@ public class ControlPanel extends JPanel {
 				infoBoxRight.setCaretPosition(0);
 			}
 		});
+		return this;
 	}
 }
