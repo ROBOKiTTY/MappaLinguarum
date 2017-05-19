@@ -3,9 +3,10 @@ package ca.rk.mappalinguarum.ui;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.Font;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -79,25 +80,21 @@ public class ApplicationFrame extends JFrame {
 	 */
 	public ApplicationFrame() {
 		try {
-			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}
-		catch (Exception e) {
-			System.out.println("UI Look and Feel not found, defaulting to system L&F.");
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			}
-			catch (ClassNotFoundException ee) {
-				ee.printStackTrace();
-			}
-			catch (InstantiationException ee) {
-				ee.printStackTrace();
-			}
-			catch (IllegalAccessException ee) {
-				ee.printStackTrace();
-			}
-			catch (UnsupportedLookAndFeelException ee) {
-				ee.printStackTrace();
-			}
+		//shouldn't really happen
+		//nothing else we can do at this stage
+		catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		catch (InstantiationException e) {
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
 		}
 		
 		initializeUI();
@@ -120,12 +117,14 @@ public class ApplicationFrame extends JFrame {
 	private void initializeUI() {
 		//finish building this frame
 		DisplayMode currentDisplay = getGraphicsConfiguration().getDevice().getDisplayMode();
+		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		screenWidth = currentDisplay.getWidth();
 		screenHeight = currentDisplay.getHeight();
 		appWidth = (int) (screenWidth / 1.5);
 		appHeight = (int) (screenHeight / 1.5);
 		addWindowListener( new WindowListener() );
-		addKeyListener( new KeyTroller() );
+		KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+		keyboardFocusManager.addKeyEventDispatcher( new KeyTroller() );
 		setSize(appWidth, appHeight);
 		setLocationRelativeTo(null);	//centres window
 		setFont(FONT);
@@ -133,7 +132,6 @@ public class ApplicationFrame extends JFrame {
 		setIconImage( APPLICATION_ICON.getImage() );
 		ToolTipManager.sharedInstance().setInitialDelay(TOOLTIP_INITIAL_DELAY);
 		ToolTipManager.sharedInstance().setDismissDelay(TOOLTIP_DISMISS_DELAY);
-		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		setVisible(true);
 		
 		//add bottom text console
@@ -228,7 +226,7 @@ public class ApplicationFrame extends JFrame {
 						e.printStackTrace();
 					}
 					catch (IOException e) {
-						TextConsole.writeLine("Cannot access map loader's system cache. Please check error logs.");
+						TextConsole.writeLine("Encountered an I/O error accessing filesystem.");
 						e.printStackTrace();
 					}
 	
@@ -289,27 +287,48 @@ public class ApplicationFrame extends JFrame {
 	}
 
 	/**
-	 * inner helper class that listens for key events
+	 * inner helper class that listens for and dispatches key events to other components
+	 * for consumption
 	 * 
 	 * @author RK
-	 * @see KeyAdapter
+	 * @see KeyEventDispatcher
 	 */
-	private class KeyTroller extends KeyAdapter {
+	private class KeyTroller implements KeyEventDispatcher {
+		//true == pressed, false == not pressed
+		//default initialized to false per Java language spec
+		private boolean[] keyStates = new boolean[256];
+		
 		/**
-		 * releasing alt key highlights first menu item
+		 * does nothing for now
+		 */
+		private void keyReleased(KeyEvent e) {
+		}
+		
+		/**
+		 * does nothing for now
+		 */
+		private void keyPressed(KeyEvent e) {
+		}
+
+		/**
+		 * sets key state and forwards key events to be handled
+		 * 
+		 * returns false to indicate that the event should be passed down the chain
+		 * by the KeyboardFocusManager
 		 */
 		@Override
-		public void keyReleased(KeyEvent e) {
-			if (e.getKeyCode() == KeyEvent.VK_ALT) {
-				Runnable r = new Runnable() {
-					@Override
-					public void run()
-					{
-						menuBar.getMenu(0).doClick();
-					}
-				};
-				SwingUtilities.invokeLater(r);
+		public boolean dispatchKeyEvent(KeyEvent e) {
+			System.out.println(e.getKeyCode() + " of ID " + e.getID());
+			if (e.getID() == KeyEvent.KEY_PRESSED || e.getID() == KeyEvent.KEY_TYPED) {
+				keyStates[e.getKeyCode()] = true;
+				keyPressed(e);
 			}
+			else if (e.getID() == KeyEvent.KEY_RELEASED) {
+				keyStates[e.getKeyCode()] = false;
+				keyReleased(e);
+			}
+			
+			return false;
 		}
 	}
 	

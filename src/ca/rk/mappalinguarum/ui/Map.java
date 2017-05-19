@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.xml.parsers.ParserConfigurationException;
@@ -86,6 +87,7 @@ public class Map extends JMapViewer implements IObservable {
 		observers = new ArrayList<IObserver>();
 		new MapTroller(this);
 		ToolTipManager.sharedInstance().registerComponent(this);
+		setBorder(BorderFactory.createEmptyBorder());
 		try {
 			data = new MapData().getParsedData();
 			List<Location> locs = data.getLocations();
@@ -136,7 +138,7 @@ public class Map extends JMapViewer implements IObservable {
 	 * @param longitude
 	 */
 	public void relocate(double latitude, double longitude) {
-		setDisplayPositionByLatLon(latitude, longitude, getZoom() );
+		setDisplayPositionByLatLon(latitude, longitude, getZoom());
 		repaint();
 	}
 	
@@ -333,9 +335,13 @@ public class Map extends JMapViewer implements IObservable {
 		}
 	}
 	
+	/**
+	 * TODO: render extra tiles to make the map seamless
+	 */
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		
 		if (isParseFailed) {
 			return;
 		}

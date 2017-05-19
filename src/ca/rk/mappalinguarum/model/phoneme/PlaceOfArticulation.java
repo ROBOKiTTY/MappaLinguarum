@@ -67,5 +67,5 @@ public enum PlaceOfArticulation implements PhonologicalFeature {
 	}
 	
 	@Override
-	public String getFullName() { return this.name(); }
+	public String getFullName() { return this.name().replace("_", "-"); }
 }

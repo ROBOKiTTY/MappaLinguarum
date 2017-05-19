@@ -1,11 +1,5 @@
 package ca.rk.mappalinguarum.model;
 
-/**
- * Data is parsed, handled, and stored in here
- * 
- * @author RK
- */
-
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -19,7 +13,11 @@ import ca.rk.mappalinguarum.model.phoneme.Consonant;
 import ca.rk.mappalinguarum.model.phoneme.PhonemeInventory;
 import ca.rk.mappalinguarum.model.phoneme.Vowel;
 
-
+/**
+ * Data is parsed, handled, and stored in here
+ * 
+ * @author RK
+ */
 public class MapData {
 
 	private final String DEFAULT_XML_PATH = "data/languagedata.xml";
