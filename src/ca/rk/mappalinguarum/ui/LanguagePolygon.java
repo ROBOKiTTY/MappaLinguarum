@@ -235,6 +235,17 @@ public class LanguagePolygon implements IObserver, IObservable {
 		return colour.toColor();
 	}
 	
+	/**
+	 * deep-copy a Polygon
+	 * 
+	 * @param poly original polygon
+	 * @return a copy
+	 */
+	public static Polygon copy(Polygon poly) {
+		Polygon copy = new Polygon(poly.xpoints, poly.ypoints, poly.npoints);
+		return copy;
+	}
+	
 	//accessors
 	public Location getEncapsulatedLocation() { return encapsulatedLocation; }
 	public Language getEncapsulatedLanguage() { return encapsulatedLocation.getLanguage(); }

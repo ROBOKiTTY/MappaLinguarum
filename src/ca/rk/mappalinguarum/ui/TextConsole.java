@@ -69,17 +69,18 @@ public class TextConsole {
 	
 	/**
 	 * append a text message to the text console, automagically adding a linebreak after;
-	 * does nothing if textConsole is null; also forwards message to System.out
+	 * inits textConsole if it is null; also forwards message to System.out
 	 * 
 	 * @param text input text message
 	 */
 	public static void writeLine(String text) {
-		if (textConsole == null) { return; }
+		if (textConsole == null) { getInstance(); }
 		
 		final String _text = text;
 		Runnable r = new Runnable() {
 			public void run() {
 				textConsole.textArea.append(_text + System.lineSeparator());
+				textConsole.textArea.setCaretPosition(textConsole.textArea.getDocument().getLength());
 			}
 		};
 		SwingUtilities.invokeLater(r);
@@ -88,14 +89,15 @@ public class TextConsole {
 	
 	/**
 	 * clear text console;
-	 * does nothing if textConsole is null
+	 * inits textConsole if it is null
 	 */
 	public static void clear() {
-		if (textConsole == null) { return; }
+		if (textConsole == null) { getInstance(); }
 
 		Runnable r = new Runnable() {
 			public void run() {
 				textConsole.textArea.setText("");
+				textConsole.textArea.setCaretPosition(textConsole.textArea.getDocument().getLength());
 			}
 		};
 		SwingUtilities.invokeLater(r);
@@ -115,6 +117,7 @@ public class TextConsole {
 		
 		private JMenuItem menuOptionCopy;
 		private JMenuItem menuOptionSelectAll;
+		private JMenuItem menuOptionClear;
 		
 		/**
 		 * constructs a ContextMenu with menu items
@@ -138,8 +141,17 @@ public class TextConsole {
 					textArea.selectAll();
 				}
 			});
+			//Clear
+			menuOptionClear = new JMenuItem("Clear");
+			menuOptionClear.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					clear();
+				}
+			});
 			add(menuOptionCopy);
 			add(menuOptionSelectAll);
+			add(menuOptionClear);
 		}
 	}
 	

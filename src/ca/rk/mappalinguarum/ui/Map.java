@@ -21,6 +21,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.DefaultMapController;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
+import org.openstreetmap.gui.jmapviewer.Tile;
 
 import ca.rk.mappalinguarum.exceptions.InvalidXMLException;
 import ca.rk.mappalinguarum.model.Feature;
@@ -51,6 +52,10 @@ public class Map extends JMapViewer implements IObservable {
 	protected final SelectionMode DEFAULT_SELECTION_MODE = SelectionMode.ONE_OF;
 	protected final double DEFAULT_LATITUDE = 54.0;
 	protected final double DEFAULT_LONGITUDE = -130.0;
+	protected final double MIN_LATITUDE = -85.05112878;
+	protected final double MAX_LATITUDE = -MIN_LATITUDE;
+	protected final double MIN_LONGITUDE = -180;
+	protected final double MAX_LONGITUDE = 180;
 	protected final int DEFAULT_ZOOM = 4;
 
 	private ViewMode viewMode;
@@ -316,9 +321,11 @@ public class Map extends JMapViewer implements IObservable {
 	private void paintPolygon(LanguagePolygon lp, Graphics2D g2d) {
 		g2d.setColor(lp.getColor());
 		List<Polygon> polys = lp.getPolygons();
+		
 		if (polys == null) {
 			return;
 		}
+		int mapWidth = tileController.getTileSource().getTileSize() << zoom;
 		for (Polygon poly : polys) {
 			if (poly != null) {
 				if (simpleRender) {
@@ -331,17 +338,34 @@ public class Map extends JMapViewer implements IObservable {
 					g2d.setPaint(new TexturePaint(lp.getTexture().getImage(), rect));
 					g2d.fill(poly);
 				}
+				//try to draw copies where they should be on seamless map
+				Polygon copy = LanguagePolygon.copy(poly);
+				copy.translate(-mapWidth, 0);
+				int xAmountFromOriginal = mapWidth;
+				//draw copies to the west where they should be visible
+				while (copy.getBounds().x + copy.getBounds().width > 0) {
+					g2d.fill(copy);
+					copy.translate(-mapWidth, 0);
+					xAmountFromOriginal += mapWidth;
+				}
+				//set copy polygon back to original x + one mapWidth east
+				copy.translate(xAmountFromOriginal + mapWidth, 0);
+				//draw copies to the east where they should be visible
+				while (copy.getBounds().x < getWidth()) {
+					g2d.fill(copy);
+					copy.translate(mapWidth, 0);
+				}
 			}
 		}
 	}
 	
-	/**
-	 * TODO: render extra tiles to make the map seamless
-	 */
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
+		drawMapSeamlessly(g);
+		
+		//if no data, then skip painting
 		if (isParseFailed) {
 			return;
 		}
@@ -353,6 +377,93 @@ public class Map extends JMapViewer implements IObservable {
 		}
 		else {
 			paintPolygons(g, selectedPolygons);
+		}
+	}
+
+	/**
+	 * repeat the map as necessary so that it wraps around seamlessly
+	 * 
+	 * @param g graphics device
+	 */
+	private void drawMapSeamlessly(Graphics g) {
+		//draw extra tiles to make map seamless
+		//determine a bounding box of where the map is in relation to the component viewport
+		//the map rectangle starts at (topLeftX, topLeftY) and has a width/height of mapWidth
+		//the viewport rectangle starts at 0, 0 and has a width/height of getWidth(), getHeight()
+		final int tileWidth = tileController.getTileSource().getTileSize();
+		final int topLeftX = getWidth() / 2 - center.x;
+		final int topLeftY = getHeight() / 2 - center.y;
+		final int mapWidth = tileWidth << zoom;
+		
+		//west edge plus x offset is within or to the east of the viewport
+		//loop and draw tiles until the viewport is covered
+		int x, y, bottomY;
+		for (x = topLeftX, y = topLeftY, bottomY = topLeftY + mapWidth; x > 0; x -= tileWidth) {
+			while (true) {
+				//y component not in viewport, skip
+				if (y > getHeight() || bottomY < 0) {
+					break;
+				}
+				//y gone over map width, finish
+				if (y >= topLeftY + mapWidth) {
+					break;
+				}
+				//reduce y until range includes visible tiles
+				if (y + tileWidth < 0 || bottomY > getHeight()) {
+					if (y + tileWidth < 0) {
+						y += tileWidth;
+					}
+					if (bottomY > getHeight()) {
+						bottomY -= tileWidth;
+					}
+					continue;
+				}
+				//draw west
+				Coordinate topLeft = getAdjustedPosition(x - tileWidth + 1, y + 1);
+				Tile tile = tileController.getTile(longitudeToTileX(topLeft.getLon(), zoom),
+							latitudeToTileY(topLeft.getLat(), zoom), zoom);
+				if (tile != null) {
+					tile.paint(g, x - tileWidth + 1, y);
+				}
+				y += tileWidth;
+			}
+			//reset y; bottomY stays the same
+			y = topLeftY;
+		}
+		
+		final int topRightX = topLeftX + mapWidth;
+		//east edge is within viewport or to its west
+		for (x = topRightX, y = topLeftY, bottomY = topLeftY + mapWidth; x < getWidth(); x += tileWidth) {
+			while (true) {
+				//y component not in viewport, skip
+				if (y > getHeight() || bottomY < 0) {
+					break;
+				}
+				//y gone over map width, finish
+				if (y >= topLeftY + mapWidth) {
+					break;
+				}
+				//reduce y until range includes visible tiles
+				if (y + tileWidth < 0 || bottomY > getHeight()) {
+					if (y + tileWidth < 0) {
+						y += tileWidth;
+					}
+					if (bottomY > getHeight()) {
+						bottomY -= tileWidth;
+					}
+					continue;
+				}
+				//draw east
+				Coordinate topRight = getAdjustedPosition(x + 1, y + 1);
+				Tile tile = tileController.getTile(longitudeToTileX(topRight.getLon(), zoom),
+							latitudeToTileY(topRight.getLat(), zoom), zoom);
+				if (tile != null) {
+					tile.paint(g, x, y);
+				}
+				y += tileWidth;
+			}
+			//reset y; bottomY stays the same
+			y = topLeftY;
 		}
 	}
 	
@@ -375,7 +486,74 @@ public class Map extends JMapViewer implements IObservable {
 		
 		return point;
 	}
-
+	
+	/**
+	 * @param lng longitude
+	 * @param zoom zoom level
+	 * @return tilex for slippy map tile
+	 */
+	private int longitudeToTileX(double lng, int zoom) {
+		return (int) Math.floor((lng + 180.0) / 360.0 * (1 << zoom));
+	}
+	
+	/**
+	 * @param lat latitude
+	 * @param zoom zoom level
+	 * @return tiley for slippy map tile
+	 */
+	private int latitudeToTileY(double lat, int zoom) {
+		int val = (int) Math.floor((1 - Math.log(Math.tan(Math.toRadians(lat))
+						+ 1 / Math.cos(Math.toRadians(lat))) / Math.PI) / 2 * (1 << zoom));
+		if (val < 0) {
+			val = 0;
+		}
+		else if (val >= (1 << zoom)) {
+			val = (1 << zoom) - 1;
+		}
+		
+		return val;
+	}
+	
+	/**
+	 * translate a point to a latlong coordinate, wrapped between max and min values
+	 * @param point a point on screen
+	 * @return latlong coordinate
+	 */
+	public Coordinate getAdjustedPosition(Point point) {
+		return getAdjustedPosition(point.x, point.y);
+	}
+	
+	/**
+	 * translate a point to a latlong coordinate, wrapped between max and min values
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @return latlong coordinate
+	 */
+	public Coordinate getAdjustedPosition(int x, int y) {
+		Coordinate coord = getPosition(x, y);
+		
+		double lat = coord.getLat();
+		while (lat < MIN_LATITUDE) {
+			lat += MAX_LATITUDE * 2;
+		}
+		while (lat > MAX_LATITUDE) {
+			lat -= MAX_LATITUDE * 2;
+		}
+		
+		double lon = coord.getLon();
+		while (lon < MIN_LONGITUDE) {
+			lon += MAX_LONGITUDE * 2;
+		}
+		while (lon > MAX_LONGITUDE) {
+			lon -= MAX_LONGITUDE * 2;
+		}
+		
+		coord.setLat(lat);
+		coord.setLon(lon);
+		
+		return coord;
+	}
+	
 	@Override
 	public void addObserver(IObserver obs) {
 		observers.add(obs);
@@ -458,8 +636,8 @@ public class Map extends JMapViewer implements IObservable {
 					return;
 				}
 				else {
-					Coordinate coord = getPosition(getMousePosition());
-					TextConsole.writeLine("{Longitude/Latitude: " + coord.getLon() + "," + coord.getLat() +
+					Coordinate coord = getAdjustedPosition(mousePosition);
+					TextConsole.writeLine("{Latitude/Longitude: " + coord.getLat() + ", " + coord.getLon() +
 										"} at mouse pointer.");
 				}
 			}

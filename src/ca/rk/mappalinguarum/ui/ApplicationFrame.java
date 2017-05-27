@@ -38,7 +38,6 @@ import org.openstreetmap.gui.jmapviewer.OsmFileCacheTileLoader;
  */
 
 public class ApplicationFrame extends JFrame {
-
 	/**
 	 * uid for serialization
 	 */
@@ -318,7 +317,6 @@ public class ApplicationFrame extends JFrame {
 		 */
 		@Override
 		public boolean dispatchKeyEvent(KeyEvent e) {
-			System.out.println(e.getKeyCode() + " of ID " + e.getID());
 			if (e.getID() == KeyEvent.KEY_PRESSED || e.getID() == KeyEvent.KEY_TYPED) {
 				keyStates[e.getKeyCode()] = true;
 				keyPressed(e);
