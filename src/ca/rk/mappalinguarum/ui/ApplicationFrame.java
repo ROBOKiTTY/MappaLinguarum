@@ -28,7 +28,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.openstreetmap.gui.jmapviewer.OsmFileCacheTileLoader;
+import ca.rk.mappalinguarum.exceptions.MapInitializationFailureException;
 
 /**
  * encapsulates the Swing frame (i.e. window) in which the application runs
@@ -212,24 +212,16 @@ public class ApplicationFrame extends JFrame {
 					try {
 						map = new Map(controlPanel);
 						map.setPreferredSize( new Dimension( (int) (appWidth * MAP_SIZE_MODIFIER), appHeight) );
-						map.setBorder( BorderFactory.createEtchedBorder() );
-						map.setTileLoader( new OsmFileCacheTileLoader(map) );
 						mapAndControlSplitPane.remove(mapPlaceholder);
 						mapAndControlSplitPane.add(map);
 						controlPanel.initiateControlBoxContents();
 						isMapInitialized = true;
+						TextConsole.writeLine("Map loaded!");
 					}
-					catch (SecurityException e) {
-						TextConsole.writeLine("Failure to access system property for security reasons. Please check "
-								+ "error logs.");
+					catch (MapInitializationFailureException e) {
+						TextConsole.writeLine("Map failed to initialize.");
 						e.printStackTrace();
 					}
-					catch (IOException e) {
-						TextConsole.writeLine("Encountered an I/O error accessing filesystem.");
-						e.printStackTrace();
-					}
-	
-					TextConsole.writeLine("Map loaded!");
 					//force validate now that UI has been layed out
 					validate();
 				}
@@ -275,12 +267,14 @@ public class ApplicationFrame extends JFrame {
 	 */
 	private class WindowListener extends WindowAdapter {
 		/**
-		 * exits application when the window is closing
+		 * exits application when the window is closed
 		 * @see WindowAdapter
 		 * 
 		 */
 		@Override
 		public void windowClosing(WindowEvent e) {
+			System.gc();
+			Runtime.getRuntime().runFinalization();
 			System.exit(0);
 		}
 	}

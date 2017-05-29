@@ -30,10 +30,12 @@ public class ApplicationMenu extends JMenuBar {
 	private final JMenuItem viewItemShowHideControlBox;
 	private final JMenuItem viewItemShowHideMap;
 	private final JMenuItem viewItemShowHideConsole;
-	private final JMenuItem viewMosaicToggle;
-	private final JMenuItem viewFamilyToggle;
-	private final JMenuItem viewOneOf;
-	private final JMenuItem viewAllOf;
+	private final JMenuItem viewItemMosaicToggle;
+	private final JMenuItem viewItemFamilyToggle;
+	private final JMenuItem viewItemOneOf;
+	private final JMenuItem viewItemAllOf;
+	private final JMenu menuEdit;
+	private final JMenuItem editItemEditorToggle;
 	private final JMenu menuHalp;
 	private final JMenuItem halpItemAbout;
 	
@@ -138,53 +140,53 @@ public class ApplicationMenu extends JMenuBar {
 			}
 		});
 		//View->Mosaic View Mode
-		viewMosaicToggle = new JMenuItem("✓ Mosaic View Mode");
-		viewMosaicToggle.setMnemonic(KeyEvent.VK_M);
-		viewMosaicToggle.addActionListener(new ActionListener() {
+		viewItemMosaicToggle = new JMenuItem("✓ Mosaic View Mode");
+		viewItemMosaicToggle.setMnemonic(KeyEvent.VK_M);
+		viewItemMosaicToggle.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Map m = getAndCastMap();
 				if (m == null) { return; }
 				m.setViewMode(ViewMode.MOSAIC);
-				viewMosaicToggle.setText("✓ Mosaic View Mode");
-				viewFamilyToggle.setText("Family View Mode");
+				viewItemMosaicToggle.setText("✓ Mosaic View Mode");
+				viewItemFamilyToggle.setText("Family View Mode");
 			}
 		});
 		//View->Family View Mode
-		viewFamilyToggle = new JMenuItem("Family View Mode");
-		viewFamilyToggle.setMnemonic(KeyEvent.VK_F);
-		viewFamilyToggle.addActionListener(new ActionListener() {
+		viewItemFamilyToggle = new JMenuItem("Family View Mode");
+		viewItemFamilyToggle.setMnemonic(KeyEvent.VK_F);
+		viewItemFamilyToggle.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Map m = getAndCastMap();
 				if (m == null) { return; }
 				m.setViewMode(ViewMode.FAMILIES);
-				viewMosaicToggle.setText("Mosaic View Mode");
-				viewFamilyToggle.setText("✓ Family View Mode");
+				viewItemMosaicToggle.setText("Mosaic View Mode");
+				viewItemFamilyToggle.setText("✓ Family View Mode");
 			}
 		});
 		//View->Display languages matching any selected option
-		viewOneOf = new JMenuItem("✓ Display languages matching any selected option");
-		viewOneOf.addActionListener(new ActionListener() {
+		viewItemOneOf = new JMenuItem("✓ Display languages matching any selected option");
+		viewItemOneOf.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Map m = getAndCastMap();
 				if (m == null) { return; }
 				m.setSelectionMode(SelectionMode.ONE_OF);
-				viewOneOf.setText("✓ Display languages matching any selected option");
-				viewAllOf.setText("Display only languages matching all selected options");
+				viewItemOneOf.setText("✓ Display languages matching any selected option");
+				viewItemAllOf.setText("Display only languages matching all selected options");
 			}
 		});
 		//View->Display only languages matching all selected options
-		viewAllOf = new JMenuItem("Display only languages matching all selected options");
-		viewAllOf.addActionListener(new ActionListener() {
+		viewItemAllOf = new JMenuItem("Display only languages matching all selected options");
+		viewItemAllOf.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Map m = getAndCastMap();
 				if (m == null) { return; }
 				m.setSelectionMode(SelectionMode.ALL_OF);
-				viewOneOf.setText("Display languages matching any selected option");
-				viewAllOf.setText("✓ Display only languages matching all selected options");
+				viewItemOneOf.setText("Display languages matching any selected option");
+				viewItemAllOf.setText("✓ Display only languages matching all selected options");
 			}
 		});
 		//putting View together
@@ -194,11 +196,35 @@ public class ApplicationMenu extends JMenuBar {
 		menuView.add(viewItemShowHideMap);
 		menuView.add(viewItemShowHideConsole);
 		menuView.addSeparator();
-		menuView.add(viewMosaicToggle);
-		menuView.add(viewFamilyToggle);
+		menuView.add(viewItemMosaicToggle);
+		menuView.add(viewItemFamilyToggle);
 		menuView.addSeparator();
-		menuView.add(viewOneOf);
-		menuView.add(viewAllOf);
+		menuView.add(viewItemOneOf);
+		menuView.add(viewItemAllOf);
+		
+		//Edit
+		menuEdit = new JMenu("Edit");
+		menuEdit.setMnemonic(KeyEvent.VK_E);
+		
+		//Edit->Enter/Exit editor mode
+		editItemEditorToggle = new JMenuItem("Enter editor mode");
+		editItemEditorToggle.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent paramActionEvent) {
+				ApplicationMode mode = mainWindow.getApplicationMode();
+				if (mode == ApplicationMode.MAP) {
+					mainWindow.setApplicationMode(ApplicationMode.EDITOR);
+					editItemEditorToggle.setText("Exit editor mode");
+				}
+				else if (mode == ApplicationMode.EDITOR) {
+					mainWindow.setApplicationMode(ApplicationMode.MAP);
+					editItemEditorToggle.setText("Enter editor mode");
+				}
+			}
+		});
+		
+		//putting Edit together
+		menuEdit.add(editItemEditorToggle);
 		
 		//Help
 		menuHalp = new JMenu("Help");
@@ -237,6 +263,7 @@ public class ApplicationMenu extends JMenuBar {
 		//tying everything together
 		this.add(menuFile);
 		this.add(menuView);
+		this.add(menuEdit);
 		this.add(menuHalp);
 	}
 	

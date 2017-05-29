@@ -26,6 +26,7 @@ Here's a minimal template, with explanations after:
 		<phoneme-consonants>p k t</phoneme-consonants>
 		<phoneme-vowels>a i o</phoneme-vowels>
 		<location>20,20,0 10,10,0 -10,-10,0 -11.424,-12.421,0</location>
+		<location>20,20,0 10,10,0 -10,-10,0 -11.424,-12.421,0</location>
 		<information>English is a language spoken by people who speak English.</information>
 		<link>http://www.example.com</link>
 		<link>http://www.another-example.com</link>
@@ -48,6 +49,6 @@ Here's a minimal template, with explanations after:
 
 * Separate two phonemes with a single space.
 
-* Location is composed of a series of vertices as in a polygon, each representing a longitude, latitude, and altitude. Altitude is unused and should be kept at 0. Separate the three with commas without preceding or trailing space. Separate each group with a single space. The first and last vertices need to be the same.
+* A Location is composed of a series of vertices as in a polygon, each representing a longitude, latitude, and altitude. Altitude is unused and should be kept at 0. Separate the three with commas without preceding or trailing space. Separate each group with a single space. The last vertex should be equal to the first vertex but is optional.
 
-* A language can have many dialects, and an XML file can contain many languages.
+* A language can have many dialects and locations, and an XML file can contain many languages.

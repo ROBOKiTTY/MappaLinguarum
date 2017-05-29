@@ -38,6 +38,7 @@ public class LanguagePolygon implements IObserver, IObservable {
 	private ArrayList<Integer> yPoints;
 	private List<IObserver> observers;
 	private boolean isHighlighted;
+	private List<Polygon> copiesOnScreen;
 	
 	/**
 	 * constructs a LanguagePolygon; remembers the Map container and takes the Location input
@@ -54,6 +55,7 @@ public class LanguagePolygon implements IObserver, IObservable {
 		familyDerivedColour = RandomColourGenerator.getInstance().mixColours(familyDerivedColour, colour);
 		isHighlighted = false;
 		observers = new ArrayList<IObserver>();
+		copiesOnScreen = new ArrayList<Polygon>();
 		
 		update();
 		if (polygons == null || polygons.isEmpty()) {
@@ -136,11 +138,18 @@ public class LanguagePolygon implements IObserver, IObservable {
 			return false;
 		}
 
-		for(Polygon poly : polygons) {
+		for (Polygon poly : polygons) {
 			if (poly.contains(p)) {
 				return true;
 			}
 		}
+		
+		for (Polygon poly : copiesOnScreen) {
+			if (poly.contains(p)) {
+				return true;
+			}
+		}
+		
 		return false;
 	}
 
@@ -266,4 +275,5 @@ public class LanguagePolygon implements IObserver, IObservable {
 		isHighlighted = b;
 		return this;
 	}
+	public List<Polygon> getPolygonCopiesOnScreen() { return copiesOnScreen; }
 }

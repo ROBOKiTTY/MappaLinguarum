@@ -21,9 +21,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.DefaultMapController;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
+import org.openstreetmap.gui.jmapviewer.OsmFileCacheTileLoader;
 import org.openstreetmap.gui.jmapviewer.Tile;
 
 import ca.rk.mappalinguarum.exceptions.InvalidXMLException;
+import ca.rk.mappalinguarum.exceptions.MapInitializationFailureException;
 import ca.rk.mappalinguarum.model.Feature;
 import ca.rk.mappalinguarum.model.Language;
 import ca.rk.mappalinguarum.model.LanguageFamily;
@@ -50,13 +52,13 @@ public class Map extends JMapViewer implements IObservable {
 	
 	protected final ViewMode DEFAULT_VIEW_MODE = ViewMode.MOSAIC;
 	protected final SelectionMode DEFAULT_SELECTION_MODE = SelectionMode.ONE_OF;
-	protected final double DEFAULT_LATITUDE = 54.0;
-	protected final double DEFAULT_LONGITUDE = -130.0;
-	protected final double MIN_LATITUDE = -85.05112878;
-	protected final double MAX_LATITUDE = -MIN_LATITUDE;
-	protected final double MIN_LONGITUDE = -180;
-	protected final double MAX_LONGITUDE = 180;
-	protected final int DEFAULT_ZOOM = 4;
+	protected final static double DEFAULT_LATITUDE = 54.0;
+	protected final static double DEFAULT_LONGITUDE = -130.0;
+	protected final static double MIN_LATITUDE = -85.05112878;
+	protected final static double MAX_LATITUDE = -MIN_LATITUDE;
+	protected final static double MIN_LONGITUDE = -180;
+	protected final static double MAX_LONGITUDE = 180;
+	protected final static int DEFAULT_ZOOM = 4;
 
 	private ViewMode viewMode;
 	private SelectionMode selectionMode;
@@ -92,7 +94,22 @@ public class Map extends JMapViewer implements IObservable {
 		observers = new ArrayList<IObserver>();
 		new MapTroller(this);
 		ToolTipManager.sharedInstance().registerComponent(this);
-		setBorder(BorderFactory.createEmptyBorder());
+		setBorder(BorderFactory.createEtchedBorder());
+		try {
+			setTileLoader( new OsmFileCacheTileLoader(this) );
+		}
+		catch (SecurityException e) {
+			TextConsole.writeLine("Failure to access system property for security reasons. Please check "
+					+ "error logs.");
+			e.printStackTrace();
+			throw new MapInitializationFailureException(e);
+		}
+		catch (IOException e) {
+			TextConsole.writeLine("Encountered an I/O error accessing filesystem.");
+			e.printStackTrace();
+			throw new MapInitializationFailureException(e);
+		}
+		
 		try {
 			data = new MapData().getParsedData();
 			List<Location> locs = data.getLocations();
@@ -291,7 +308,7 @@ public class Map extends JMapViewer implements IObservable {
 	 * @param g the Graphics object for this
 	 * @param lpCollection the collection of LanguagePolygons to paint
 	 */
-	private void paintPolygons(Graphics g, Collection<LanguagePolygon> lpCollection) {
+	private void paintLanguagePolygons(Graphics g, Collection<LanguagePolygon> lpCollection) {
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
@@ -307,20 +324,22 @@ public class Map extends JMapViewer implements IObservable {
 			else {
 				lp.setIsHighlighted(false);
 			}
-			paintPolygon(lp, g2d);
+			paintLanguagePolygon(lp, g2d);
 		}
 		
 		if (renderLast != null) {
-			paintPolygon(renderLast, g2d);
+			paintLanguagePolygon(renderLast, g2d);
 		}
 	}
 	
 	/**
 	 * paint a single LanguagePolygon collection, which cannot be null
 	 */
-	private void paintPolygon(LanguagePolygon lp, Graphics2D g2d) {
+	private void paintLanguagePolygon(LanguagePolygon lp, Graphics2D g2d) {
 		g2d.setColor(lp.getColor());
 		List<Polygon> polys = lp.getPolygons();
+		//invalidate copies and recalculate
+		lp.getPolygonCopiesOnScreen().clear();;
 		
 		if (polys == null) {
 			return;
@@ -341,18 +360,22 @@ public class Map extends JMapViewer implements IObservable {
 				//try to draw copies where they should be on seamless map
 				Polygon copy = LanguagePolygon.copy(poly);
 				copy.translate(-mapWidth, 0);
-				int xAmountFromOriginal = mapWidth;
+				int xAmountFromOriginal = -mapWidth;
 				//draw copies to the west where they should be visible
 				while (copy.getBounds().x + copy.getBounds().width > 0) {
 					g2d.fill(copy);
+					lp.getPolygonCopiesOnScreen().add(copy);
+					copy = LanguagePolygon.copy(copy);
 					copy.translate(-mapWidth, 0);
-					xAmountFromOriginal += mapWidth;
+					xAmountFromOriginal -= mapWidth;
 				}
 				//set copy polygon back to original x + one mapWidth east
-				copy.translate(xAmountFromOriginal + mapWidth, 0);
+				copy.translate(-xAmountFromOriginal + mapWidth, 0);
 				//draw copies to the east where they should be visible
 				while (copy.getBounds().x < getWidth()) {
 					g2d.fill(copy);
+					lp.getPolygonCopiesOnScreen().add(copy);
+					copy = LanguagePolygon.copy(copy);
 					copy.translate(mapWidth, 0);
 				}
 			}
@@ -373,10 +396,10 @@ public class Map extends JMapViewer implements IObservable {
 		if (criteriaLocations.isEmpty() &&
 			criteriaFamilies.isEmpty() &&
 			criteriaFeatures.isEmpty() ) {
-			paintPolygons(g, langPolygons);
+			paintLanguagePolygons(g, langPolygons);
 		}
 		else {
-			paintPolygons(g, selectedPolygons);
+			paintLanguagePolygons(g, selectedPolygons);
 		}
 	}
 
@@ -408,12 +431,14 @@ public class Map extends JMapViewer implements IObservable {
 				if (y >= topLeftY + mapWidth) {
 					break;
 				}
-				//reduce y until range includes visible tiles
-				if (y + tileWidth < 0 || bottomY > getHeight()) {
-					if (y + tileWidth < 0) {
+				//reduce y until range includes only visible tiles
+				final boolean isYTileOutOfView = y + tileWidth < 0;
+				final boolean isBottomYOutOfView = bottomY > getHeight();
+				if (isYTileOutOfView || isBottomYOutOfView) {
+					if (isYTileOutOfView) {
 						y += tileWidth;
 					}
-					if (bottomY > getHeight()) {
+					if (isBottomYOutOfView) {
 						bottomY -= tileWidth;
 					}
 					continue;
@@ -443,12 +468,14 @@ public class Map extends JMapViewer implements IObservable {
 				if (y >= topLeftY + mapWidth) {
 					break;
 				}
-				//reduce y until range includes visible tiles
-				if (y + tileWidth < 0 || bottomY > getHeight()) {
-					if (y + tileWidth < 0) {
+				//reduce y until range includes only visible tiles
+				final boolean isYTileOutOfView = y + tileWidth < 0;
+				final boolean isBottomYOutOfView = bottomY > getHeight();
+				if (isYTileOutOfView || isBottomYOutOfView) {
+					if (isYTileOutOfView) {
 						y += tileWidth;
 					}
-					if (bottomY > getHeight()) {
+					if (isBottomYOutOfView) {
 						bottomY -= tileWidth;
 					}
 					continue;
@@ -668,19 +695,28 @@ public class Map extends JMapViewer implements IObservable {
 					else if ( SwingUtilities.isRightMouseButton(e) ) {
 						controlPanel.setInfoBoxRightText( l.getHTML() );
 					}
-	        	}
+				}
 			}
 		}
 		
 		/**
 		 * detects which polygon the mouse is currently over and update the state accordingly
+		 * also quietly recentres component if it goes too far left or right
 		 */
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			super.mouseMoved(e);
-        	if (isParseFailed) {
-        		return;
-        	}
+			final int mapWidth = tileController.getTileSource().getTileSize() << zoom;
+			while (center.x < 0) {
+				moveMap(mapWidth, 0);
+			}
+			while (center.x > getWidth()) {
+				moveMap(-mapWidth, 0);
+			}
+			
+			if (isParseFailed) {
+				return;
+			}
 			
 			Point p = e.getPoint();
 			if (mouseoveredLP != null && mouseoveredLP.contains(p) ) {
@@ -689,7 +725,7 @@ public class Map extends JMapViewer implements IObservable {
 
 			for (LanguagePolygon lp : langPolygons) {
 				if (lp.contains(p) ) {
-					//only update state if moused-over language polygon is actually visible in the current view
+					//only update state if moused-over language polygon is actually visible in the current view mode
 					if ( ( criteriaLocations.isEmpty() && criteriaFamilies.isEmpty() && criteriaFeatures.isEmpty() )
 						|| selectedPolygons.contains(lp) ) {
 						mouseoveredLP = lp;
